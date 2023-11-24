@@ -12,6 +12,7 @@
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore"
   },
   "dependencies": {
+    "@vueuse/core": "^10.6.1",
     "vue": "^3.3.4"
   },
   "devDependencies": {
@@ -29,6 +30,7 @@
     "eslint-plugin-vue": "^9.17.0",
     "jsdom": "^22.1.0",
     "npm-run-all2": "^6.1.1",
+    "sass": "^1.69.5",
     "typescript": "~5.2.0",
     "unocss": "^0.57.7",
     "vite": "^4.4.11",

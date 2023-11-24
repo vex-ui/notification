@@ -1,10 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
-import { useEventListener, useMouseInElement } from '@vueuse/core'
-import { IconDangerSign, IconBell, IconXMark, IconCheckCircle, IconWarn } from '@/icons'
-import { useTimer } from '@/composables'
-import { Progress } from '@/components/progress'
-import { animate } from 'motion'
+import { useMouseInElement } from '@vueuse/core'
+import { useTimer, useEventListener } from '@/composables'
 
 //----------------------------------------------------------------------------------------------------
 // 📌 component meta
@@ -40,7 +37,6 @@ const slots = defineSlots<{
 //----------------------------------------------------------------------------------------------------
 
 const NotificationEl = ref<HTMLElement | null>(null)
-const ProgressEl = ref<InstanceType<typeof Progress> | null>(null)
 const progressValue = ref(0)
 // we add 300ms to compensate for the lost time during enter transition
 const _duration = p.duration + 300
@@ -76,12 +72,10 @@ function onBlur() {
 
 function pauseTimer() {
   timer?.pause()
-  ProgressEl.value?.pause()
 }
 
 function resumeTimer() {
   timer?.resume()
-  ProgressEl.value?.resume()
 }
 
 //----------------------------------------------------------------------------------------------------
@@ -138,18 +132,16 @@ useEventListener(NotificationEl, 'touchend', (e: TouchEvent) => {
   }
 
   requestAnimationFrame(() => {
-    animate(NotificationEl.value!, { x: [delta, 0] }, { duration: 0.15, easing: 'ease-out' })
+    if (NotificationEl.value) {
+      NotificationEl.value.animate([{ transform: 'translateX(0)' }], {
+        duration: '150ms',
+        easing: 'ease-out',
+      })
+    }
   })
 })
 
 //----------------------------------------------------------------------------------------------------
-
-const icon = computed(() => {
-  if (p.type === 'danger') return IconDangerSign
-  if (p.type === 'warning') return IconWarn
-  if (p.type === 'success') return IconCheckCircle
-  return IconBell
-})
 
 const modifierClasses = computed(() => [
   slots.default ? 'vex-notification-custom' : `vex-notification`,
@@ -170,39 +162,6 @@ const modifierClasses = computed(() => [
     @blur="onBlur"
     :class="modifierClasses"
   >
-    <slot>
-      <!-- icon -->
-
-      <div class="vex-notification-icon">
-        <slot name="icon">
-          <Component :is="icon" width="20" height="20" />
-        </slot>
-      </div>
-
-      <!-- content -->
-
-      <div class="vex-notification-content">
-        <slot name="title" />
-        <slot name="body" />
-      </div>
-    </slot>
-
-    <!-- close button -->
-
-    <button type="button" aria-label="close" class="vex-notification-close" @click="onClose">
-      <IconXMark />
-    </button>
-
-    <!-- progress bar -->
-
-    <div v-if="!p.persist && !hideProgress" class="vex-notification-progress">
-      <Progress
-        ref="ProgressEl"
-        :color="p.type"
-        :duration="_duration"
-        :value="progressValue"
-        inert
-      />
-    </div>
+    <slot />
   </div>
 </template>

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { NotificationItem } from '.'
-import Notification from './Notification.vue'
+import Notification from './VNotification.vue'
 import { animate, timeline } from 'motion'
 import { useEventListener } from '@vueuse/core'
 import { isString, remove } from '@/utils'
