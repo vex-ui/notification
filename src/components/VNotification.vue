@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import { useMouseInElement } from '@vueuse/core'
 import { useTimer, useEventListener } from '@/composables'
 
@@ -9,28 +9,13 @@ import { useTimer, useEventListener } from '@/composables'
 
 const p = withDefaults(
   defineProps<{
-    type?: 'success' | 'danger' | 'warning' | 'primary' | 'info'
     duration?: number
     persist?: boolean
-    hideProgress?: boolean
   }>(),
   {
-    type: 'primary',
     duration: 10000,
   }
 )
-
-const emit = defineEmits<{
-  close: []
-}>()
-
-const slots = defineSlots<{
-  default?: (props: {}) => any
-  title?: (props: {}) => any
-  body?: (props: {}) => any
-  customContent?: (props: {}) => any
-  icon?: (props: {}) => any
-}>()
 
 //----------------------------------------------------------------------------------------------------
 // 📌 timer
@@ -55,7 +40,6 @@ if (timer) {
 
 function onClose() {
   timer?.stop()
-  emit('close')
 }
 
 function onMouseLeave() {
@@ -119,7 +103,7 @@ useEventListener(NotificationEl, 'touchmove', (e: TouchEvent) => {
   }
 })
 
-useEventListener(NotificationEl, 'touchend', (e: TouchEvent) => {
+useEventListener(NotificationEl, 'touchend', () => {
   // Ignore left swipes
   if (prevX < initialX) return
 
@@ -142,11 +126,6 @@ useEventListener(NotificationEl, 'touchend', (e: TouchEvent) => {
 })
 
 //----------------------------------------------------------------------------------------------------
-
-const modifierClasses = computed(() => [
-  slots.default ? 'vex-notification-custom' : `vex-notification`,
-  `--type-${p.type}`,
-])
 </script>
 
 <template>
@@ -160,7 +139,6 @@ const modifierClasses = computed(() => [
     @mouseleave="onMouseLeave"
     @focus="pauseTimer"
     @blur="onBlur"
-    :class="modifierClasses"
   >
     <slot />
   </div>
