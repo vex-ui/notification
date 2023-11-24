@@ -17,12 +17,18 @@ const p = withDefaults(
   }
 )
 
+const emit = defineEmits<{
+  timerStop: []
+  timerStart: []
+  timerPause: []
+  timerResume: []
+}>()
+
 //----------------------------------------------------------------------------------------------------
 // 📌 timer
 //----------------------------------------------------------------------------------------------------
 
 const NotificationEl = ref<HTMLElement | null>(null)
-const progressValue = ref(0)
 // we add 300ms to compensate for the lost time during enter transition
 const _duration = p.duration + 300
 const timer = !p.persist ? useTimer(_duration, onClose) : undefined
@@ -33,13 +39,12 @@ const { isOutside: isMouseOutside } = useMouseInElement(NotificationEl)
 
 if (timer) {
   onMounted(() => {
-    timer.start()
-    progressValue.value = 100
+    startTimer()
   })
 }
 
 function onClose() {
-  timer?.stop()
+  stopTimer()
 }
 
 function onMouseLeave() {
@@ -54,12 +59,24 @@ function onBlur() {
   }
 }
 
+function startTimer() {
+  timer?.start()
+  emit('timerStart')
+}
+
+function stopTimer() {
+  timer?.stop()
+  emit('timerStop')
+}
+
 function pauseTimer() {
   timer?.pause()
+  emit('timerPause')
 }
 
 function resumeTimer() {
   timer?.resume()
+  emit('timerResume')
 }
 
 //----------------------------------------------------------------------------------------------------
@@ -124,8 +141,6 @@ useEventListener(NotificationEl, 'touchend', () => {
     }
   })
 })
-
-//----------------------------------------------------------------------------------------------------
 </script>
 
 <template>
