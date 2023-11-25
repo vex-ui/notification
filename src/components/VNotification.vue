@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
-import { useMouseInElement } from '@vueuse/core'
-import { useTimer, useEventListener } from '@/composables'
+import { useEventListener } from '@vueuse/core'
+import { useTimer } from '@/composables'
 
 //----------------------------------------------------------------------------------------------------
 // 📌 component meta
@@ -29,13 +29,15 @@ const emit = defineEmits<{
 //----------------------------------------------------------------------------------------------------
 
 const NotificationEl = ref<HTMLElement | null>(null)
-// we add 300ms to compensate for the lost time during enter transition
-const _duration = p.duration + 300
-const timer = !p.persist ? useTimer(_duration, onClose) : undefined
+const timer = !p.persist ? useTimer(p.duration, onClose) : undefined
 
-// TODO: this is too expensive for its usage
-// find a better solution
-const { isOutside: isMouseOutside } = useMouseInElement(NotificationEl)
+const isMouseOutside = ref(false)
+useEventListener(NotificationEl, 'mouseenter', () => {
+  isMouseOutside.value = false
+})
+useEventListener(NotificationEl, 'mouseleave', () => {
+  isMouseOutside.value = true
+})
 
 if (timer) {
   onMounted(() => {
