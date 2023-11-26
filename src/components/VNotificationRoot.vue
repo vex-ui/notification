@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import type { NotificationItem } from '.'
 import Notification from './VNotification.vue'
-import { animate, timeline } from 'motion'
 import { useEventListener } from '@vueuse/core'
 import { isString, remove } from '@/utils'
 import { ref } from 'vue'
@@ -11,6 +10,7 @@ import { ref } from 'vue'
 //----------------------------------------------------------------------------------------------------
 
 const items = ref<NotificationItem[]>([])
+const NotificationRootEl = ref<HTMLElement | null>(null)
 
 function addNotification(notification: NotificationItem) {
   items.value.unshift(notification)
@@ -30,8 +30,7 @@ function removeAll() {
 
 useEventListener('keydown', (e: KeyboardEvent) => {
   if (e.key === 'F8' && !e.altKey && !e.shiftKey && !e.ctrlKey) {
-    const el = document.querySelector<HTMLElement>('.vex-notification-root')
-    el?.focus()
+    NotificationRootEl.value?.focus()
   }
 })
 
@@ -40,36 +39,12 @@ useEventListener('keydown', (e: KeyboardEvent) => {
 //----------------------------------------------------------------------------------------------------
 
 async function onEnter(el: HTMLElement, done: () => void) {
-  const children = el.querySelectorAll<HTMLElement>('.vex-notification-item > *')
-  const { opacity, transform } = getComputedStyle(el)
-
-  await timeline(
-    [
-      [el, { x: ['100%', 0], opacity: [0, 1] }, { duration: 0.25 }],
-      [children, { opacity: [0, 1] }, { duration: 0.3, at: 0.3 }],
-    ],
-    { defaultOptions: { easing: 'ease-out' }, persist: false }
-  ).finished
-
-  children.forEach((child) => {
-    child.style.opacity = ''
-  })
-  el.style.opacity = opacity
-  el.style.transform = transform
-
   done()
 }
 
-function onBeforeLeave(el: HTMLElement) {
-  // make the element retain its position
-  const rect = el.getBoundingClientRect()
-  el.style.top = `${rect.top}px`
-  el.style.left = `${rect.left}px`
-  el.style.position = 'absolute'
-}
+function onBeforeLeave(el: HTMLElement) {}
 
 async function onLeave(el: HTMLElement, done: () => void) {
-  await animate(el, { opacity: 0, x: '100%' }, { duration: 0.3 }).finished
   done()
 }
 
@@ -86,6 +61,7 @@ defineExpose({
   <Teleport to="body">
     <TransitionGroup
       tag="div"
+      ref="NotificationRootEl"
       id="vex-notification-root"
       class="vex-notification-root"
       moveClass="vex-notification-move-class"
