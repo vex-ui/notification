@@ -59,16 +59,9 @@ defineExpose({
 
 <template>
   <Teleport to="body">
-    <TransitionGroup
-      tag="div"
+    <div
       ref="NotificationRootEl"
       id="vex-notification-root"
-      class="vex-notification-root"
-      moveClass="vex-notification-move-class"
-      leaveActiveClass="vex-notification-leave-active"
-      @beforeLeave="onBeforeLeave"
-      @enter="onEnter"
-      @leave="onLeave"
       aria-label="Notifications (F8)"
       tabindex="-1"
       role="region"
@@ -78,11 +71,8 @@ defineExpose({
         v-for="item in items"
         :key="item.key"
         :duration="item.duration"
-        :type="item.type"
         :persist="item.persist"
-        :hide-progress="item.hideProgress"
-        :closeable="item.closable"
-        @close="removeNotification(item)"
+        @stop-timer="removeNotification(item)"
       >
         <template v-if="item.customContent" #default>
           <Component :is="item.customContent" />
@@ -108,6 +98,6 @@ defineExpose({
           <Component :is="item.icon" />
         </template>
       </Notification>
-    </TransitionGroup>
+    </div>
   </Teleport>
 </template>
