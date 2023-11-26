@@ -31,34 +31,10 @@ const emit = defineEmits<{
 const NotificationEl = ref<HTMLElement | null>(null)
 const timer = !p.persist ? useTimer(p.duration, onClose) : undefined
 
-const isMouseOutside = ref(false)
-useEventListener(NotificationEl, 'mouseenter', () => {
-  isMouseOutside.value = false
-})
-useEventListener(NotificationEl, 'mouseleave', () => {
-  isMouseOutside.value = true
-})
-
 if (timer) {
   onMounted(() => {
     startTimer()
   })
-}
-
-function onClose() {
-  stopTimer()
-}
-
-function onMouseLeave() {
-  if (document.activeElement !== NotificationEl.value) {
-    resumeTimer()
-  }
-}
-
-function onBlur() {
-  if (isMouseOutside.value) {
-    resumeTimer()
-  }
 }
 
 function startTimer() {
@@ -81,15 +57,39 @@ function resumeTimer() {
   emit('timerResume')
 }
 
+const isMouseInside = ref(false)
+useEventListener(NotificationEl, 'mouseenter', () => {
+  isMouseInside.value = true
+  pauseTimer()
+})
+
+useEventListener(NotificationEl, 'mouseleave', () => {
+  isMouseInside.value = false
+  if (document.activeElement !== NotificationEl.value) {
+    resumeTimer()
+  }
+})
+
+function onClose() {
+  stopTimer()
+}
+
+function onFocus() {
+  pauseTimer()
+}
+
+function onBlur() {
+  if (!isMouseInside.value) {
+    resumeTimer()
+  }
+}
+
 //----------------------------------------------------------------------------------------------------
 // 📌 swipe gesture
-//
-// TODO: extract into composable
-// TODO: does this work on pc touch screens?
 //----------------------------------------------------------------------------------------------------
 
-let initialX = 0
 let prevX = 0
+let initialX = 0
 let lastFrame: number | null = null
 
 useEventListener(NotificationEl, 'touchstart', (e: TouchEvent) => {
@@ -102,6 +102,7 @@ useEventListener(NotificationEl, 'touchmove', (e: TouchEvent) => {
   e.preventDefault()
   e.stopPropagation()
 
+  // TODO: make this code bidirectional
   // Ignore left swipes beyond the initial position
   // reset prevX to prevent jumps
   if (e.touches[0].clientX < initialX) {
@@ -127,13 +128,13 @@ useEventListener(NotificationEl, 'touchend', () => {
   if (prevX < initialX) return
 
   // if the swipe distance is greater than 33% of el width, close
-  // else reset the element's transform to 0
   const delta = Math.abs(prevX - initialX)
   if (delta > Math.floor(NotificationEl.value!.offsetWidth / 3)) {
     onClose()
     return
   }
 
+  // otherwise reset the element's position.
   requestAnimationFrame(() => {
     if (NotificationEl.value) {
       NotificationEl.value.animate([{ transform: 'translateX(0)' }], {
@@ -142,6 +143,13 @@ useEventListener(NotificationEl, 'touchend', () => {
       })
     }
   })
+})
+
+defineExpose({
+  stopTimer,
+  startTimer,
+  pauseTimer,
+  resumeTimer,
 })
 </script>
 
@@ -152,9 +160,7 @@ useEventListener(NotificationEl, 'touchend', () => {
     role="status"
     aria-atomic
     @keydown.esc="onClose"
-    @mouseenter="pauseTimer"
-    @mouseleave="onMouseLeave"
-    @focus="pauseTimer"
+    @focus="onFocus"
     @blur="onBlur"
   >
     <slot />
