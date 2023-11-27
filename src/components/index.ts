@@ -1,26 +1,19 @@
-import { h, markRaw, render } from 'vue'
+import { h, render } from 'vue'
 import type { VNode, Component } from 'vue'
 import NotificationRoot from './VNotificationRoot.vue'
 import { useID } from '@/composables'
-import './Notification.scss'
-import './NotificationRoot.scss'
-
-export interface NotifyProps {
-  title?: string | Component
-  body?: string | Component
-  type?: 'success' | 'danger' | 'warning' | 'primary' | 'info'
-  icon?: Component
-  customContent?: Component
-}
 
 export interface NotifyOptions {
   duration?: number
   persist?: boolean
   closable?: boolean
   hideProgress?: boolean
+  title?: string | Component
+  body?: string | Component
+  customContent?: Component
 }
 
-export interface NotificationItem extends NotifyProps, NotifyOptions {
+export interface NotificationItem extends NotifyOptions {
   key: string
 }
 
@@ -32,35 +25,15 @@ function useNotification() {
     render(Root, document.createDocumentFragment() as unknown as Element)
   }
 
-  /**
-   * adds a new notification.
-   * @returns A function that removes the notification.
-   */
-  function notify(args: NotifyProps = {}, options: NotifyOptions = {}) {
-    const notification: NotificationItem = markRaw({
-      key: useID(),
-      ...args,
-      ...options,
-    })
-    Root?.component?.exposed?.addNotification(notification)
-
-    /**
-     * removes the notification.
-     */
-    const remove = () => {
-      Root?.component?.exposed?.removeNotification(notification)
-    }
-
-    return remove
-  }
-
-  function clearNotification() {
-    Root?.component?.exposed?.removeAll()
-  }
-
   return {
-    notify,
-    clearNotification,
+    notify: (options: NotifyOptions = {}) => {
+      const notification = { key: useID(), ...options }
+      Root?.component?.exposed?.addNotification(notification)
+      return () => Root?.component?.exposed?.removeNotification(notification)
+    },
+    clearAllNotification: () => {
+      Root?.component?.exposed?.clearAll()
+    },
   }
 }
 
