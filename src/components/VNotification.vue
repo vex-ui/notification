@@ -58,6 +58,7 @@ function resumeTimer() {
 }
 
 const isMouseInside = ref(false)
+
 useEventListener(NotificationEl, 'mouseenter', () => {
   isMouseInside.value = true
   pauseTimer()

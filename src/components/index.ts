@@ -4,12 +4,12 @@ import NotificationRoot from './VNotificationRoot.vue'
 import { useID } from '@/composables'
 
 export interface NotifyOptions {
-  duration?: number
+  body?: string | Component
+  title?: string | Component
   persist?: boolean
+  duration?: number
   closable?: boolean
   hideProgress?: boolean
-  title?: string | Component
-  body?: string | Component
   customContent?: Component
 }
 
@@ -27,9 +27,13 @@ function useNotification() {
 
   return {
     notify: (options: NotifyOptions = {}) => {
-      const notification = { key: useID(), ...options }
+      const key = useID()
+      const notification = { key, ...options }
       Root?.component?.exposed?.addNotification(notification)
-      return () => Root?.component?.exposed?.removeNotification(notification)
+      return {
+        key,
+        remove: () => Root?.component?.exposed?.removeNotification(notification),
+      }
     },
     clearAllNotification: () => {
       Root?.component?.exposed?.clearAll()
