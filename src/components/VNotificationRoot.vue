@@ -1,10 +1,18 @@
 <script lang="ts">
 export const NOTIFICATION_INJECTION_KEY = Symbol() as InjectionKey<{}>
+
+export function useNotificationContext() {
+  const ctx = inject(NOTIFICATION_INJECTION_KEY, null)
+  if (!ctx) {
+    throw new Error('[vex] <Notification> is missing a <NotificationRoot> parent')
+  }
+  return ctx
+}
 </script>
 
 <script setup lang="ts">
 import { remove } from '@/utils'
-import { ref, type InjectionKey, provide } from 'vue'
+import { ref, type InjectionKey, provide, inject } from 'vue'
 import type { NotificationItem } from '.'
 
 defineOptions({
