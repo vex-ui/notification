@@ -1,5 +1,5 @@
 let count = 0
 
 export function useID() {
-  return `vex-${count++}`
+  return `vex-notification:${count++}`
 }
