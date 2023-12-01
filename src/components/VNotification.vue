@@ -9,6 +9,7 @@ import { useTimer } from '@/composables'
 
 const p = withDefaults(
   defineProps<{
+    id: string
     duration?: number
     persist?: boolean
   }>(),
