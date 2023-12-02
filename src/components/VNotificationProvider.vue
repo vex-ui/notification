@@ -41,19 +41,28 @@ function removeNotification(item: NotificationItem) {
     ref="NotificationProviderEl"
     id="vex-notification-provider"
     aria-label="Notifications (F8)"
+    class="fixed top-0 left-0 w-screen h-screen p-4 overflow-hidden pointer-events-none flex flex-col justify-start items-end gap-4 z-1000"
     v-bind="$attrs"
     tabindex="-1"
     role="region"
     aria-live="polite"
     @keydown="onKeydown"
   >
-    <VNotification
-      v-for="item in notifications"
-      :key="item.uuid"
-      :duration="item.duration"
-      :persist="item.persist"
-      @timer-stop="removeNotification(item)"
-      >this is a notification</VNotification
+    <TransitionGroup
+      move-class="transition-all duration-500"
+      enterActiveClass="transition-all duration-500 ease-in-out"
+      leaveActiveClass="transition-all duration-500 ease-in-out absolute"
+      enterFromClass="translate-x-full"
+      leaveToClass="translate-x-full"
     >
+      <VNotification
+        v-for="item in notifications"
+        :key="item.uuid"
+        :duration="item.duration"
+        :persist="item.persist"
+        @timer-stop="removeNotification(item)"
+        >this is a notification</VNotification
+      >
+    </TransitionGroup>
   </div>
 </template>

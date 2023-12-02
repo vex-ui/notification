@@ -1,7 +1,7 @@
 import { useID } from '@/composables'
 import { remove } from '@/utils'
 import type { Component, InjectionKey, Plugin, Ref } from 'vue'
-import { ref, shallowRef } from 'vue'
+import { ref } from 'vue'
 
 export interface NotifyOptions {
   body?: string | Component
@@ -24,7 +24,7 @@ export interface AppContext extends NotificationPluginOptions {
 }
 
 export const APP_CONTEXT = Symbol() as InjectionKey<AppContext>
-export const notifications = ref<NotificationItem[]>([])
+export const notifications: Ref<NotificationItem[]> = ref([])
 
 export const plugin: Plugin<NotificationPluginOptions> = {
   install(app, options) {
@@ -37,7 +37,7 @@ export function useNotification() {
     notify: (options: NotifyOptions = {}) => {
       const uuid = useID()
       const notification = { uuid, ...options }
-      notifications.value.push(notification)
+      notifications.value.unshift(notification)
       return {
         remove: () => remove(notifications.value, notification),
       }
