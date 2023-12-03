@@ -57,6 +57,8 @@ function removeNotification(item: NotificationItem) {
     >
       <VNotification
         v-for="item in notifications"
+        role="status"
+        aria-atomic="true"
         :key="item.uuid"
         :duration="item.duration"
         :persist="item.persist"

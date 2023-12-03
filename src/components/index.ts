@@ -37,7 +37,7 @@ export function useNotification() {
     notify: (options: NotifyOptions = {}) => {
       const uuid = useID()
       const notification = { uuid, ...options }
-      notifications.value.push(notification)
+      notifications.value.unshift(notification)
       return {
         remove: () => remove(notifications.value, notification),
       }
