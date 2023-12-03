@@ -137,7 +137,7 @@ defineExpose({
 <template>
   <div
     ref="NotificationEl"
-    class="text-sm rounded-sm bg-white shadow-sm pointer-events-auto flex shrink-0 items-start gap-2 p-4 w-20rem max-w-[calc(100vw-2rem)] overflow-hidden"
+    class="text-base rounded-sm bg-white shadow pointer-events-auto flex shrink-0 items-start gap-2 p-4 w-20rem max-w-[calc(100vw-2rem)] overflow-hidden"
     tabindex="0"
     role="status"
     aria-atomic
