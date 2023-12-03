@@ -1,9 +1,7 @@
-import { ref } from 'vue'
+import { ref, type Ref } from 'vue'
 import { useEventListener } from '@vueuse/core'
 
-export default function useSwipeGesture() {
-  const targetEl = ref<HTMLElement | null>(null)
-
+export default function useSwipeGesture(target: Ref<HTMLElement | null>) {
   let prevX = 0
   let initialX = 0
   let lastFrame: number | null = null
@@ -22,26 +20,26 @@ export default function useSwipeGesture() {
       return
     }
 
-    if (!lastFrame && targetEl.value) {
+    if (!lastFrame && target.value) {
       lastFrame = requestAnimationFrame(() => {
         lastFrame = null
         prevX = e.touches[0].clientX
         const delta = Math.abs(prevX - initialX)
-        targetEl.value!.style.transform = `translateX(${delta}px)`
+        target.value!.style.transform = `translateX(${delta}px)`
       })
     }
   }
 
   const onTouchEnd = () => {
     const delta = Math.abs(prevX - initialX)
-    if (delta > Math.floor(targetEl.value!.offsetWidth / 3)) {
-      targetEl.value?.dispatchEvent(new Event('swipe'))
+    if (delta > Math.floor(target.value!.offsetWidth / 3)) {
+      target.value?.dispatchEvent(new Event('swipe'))
       return
     }
 
     requestAnimationFrame(() => {
-      if (targetEl.value) {
-        targetEl.value.animate([{ transform: 'translateX(0)' }], {
+      if (target.value) {
+        target.value.animate([{ transform: 'translateX(0)' }], {
           duration: 150,
           easing: 'ease-out',
         })
@@ -49,14 +47,7 @@ export default function useSwipeGesture() {
     })
   }
 
-  const setTarget = (el: HTMLElement) => {
-    targetEl.value = el
-    useEventListener(targetEl.value, 'touchstart', onTouchStart)
-    useEventListener(targetEl.value, 'touchmove', onTouchMove)
-    useEventListener(targetEl.value, 'touchend', onTouchEnd)
-  }
-
-  return {
-    setTarget,
-  }
+  useEventListener(target.value, 'touchstart', onTouchStart)
+  useEventListener(target.value, 'touchmove', onTouchMove)
+  useEventListener(target.value, 'touchend', onTouchEnd)
 }
