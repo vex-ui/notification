@@ -29,17 +29,13 @@ const emit = defineEmits<{
 //----------------------------------------------------------------------------------------------------
 
 const NotificationEl = ref<HTMLElement | null>(null)
-const timer = !p.persist ? useTimer(p.duration, onClose) : undefined
+const timer = !p.persist ? useTimer(p.duration, stopTimer) : undefined
 
 if (timer) {
   onMounted(() => {
-    startTimer()
+    timer?.start()
+    emit('timerStart')
   })
-}
-
-function startTimer() {
-  timer?.start()
-  emit('timerStart')
 }
 
 function stopTimer() {
@@ -71,20 +67,6 @@ useEventListener(NotificationEl, 'mouseleave', () => {
   }
 })
 
-function onClose() {
-  stopTimer()
-}
-
-function onFocus() {
-  pauseTimer()
-}
-
-function onBlur() {
-  if (!isMouseInside.value) {
-    resumeTimer()
-  }
-}
-
 //----------------------------------------------------------------------------------------------------
 // 📌 swipe gesture
 //----------------------------------------------------------------------------------------------------
@@ -94,6 +76,7 @@ let initialX = 0
 let lastFrame: number | null = null
 
 useEventListener(NotificationEl, 'touchstart', (e: TouchEvent) => {
+  pauseTimer()
   initialX = e.touches[0].clientX
 })
 
@@ -125,30 +108,27 @@ useEventListener(NotificationEl, 'touchmove', (e: TouchEvent) => {
 })
 
 useEventListener(NotificationEl, 'touchend', () => {
+  resumeTimer()
   // Ignore left swipes
   if (prevX < initialX) return
 
   // if the swipe distance is greater than 33% of el width, close
   const delta = Math.abs(prevX - initialX)
   if (delta > Math.floor(NotificationEl.value!.offsetWidth / 3)) {
-    onClose()
+    stopTimer()
     return
   }
 
   // otherwise reset the element's position.
   requestAnimationFrame(() => {
     if (NotificationEl.value) {
-      NotificationEl.value.animate([{ transform: 'translateX(0)' }], {
-        duration: '150ms',
-        easing: 'ease-out',
-      })
+      NotificationEl.value.style.transform = `translateX(0)`
     }
   })
 })
 
 defineExpose({
   stopTimer,
-  startTimer,
   pauseTimer,
   resumeTimer,
 })
@@ -161,9 +141,9 @@ defineExpose({
     tabindex="0"
     role="status"
     aria-atomic
-    @keydown.esc="onClose"
-    @focus="onFocus"
-    @blur="onBlur"
+    @keydown.esc="stopTimer"
+    @focus="pauseTimer"
+    @blur="resumeTimer"
   >
     <slot />
   </div>
