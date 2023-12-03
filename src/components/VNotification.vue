@@ -1,13 +1,13 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
-import { useEventListener } from '@vueuse/core'
+import { onMounted, ref, computed } from 'vue'
+import { useSwipe } from '@vueuse/core'
 import { useTimer } from '@/composables'
 
-//----------------------------------------------------------------------------------------------------
-// 📌 component meta
-//----------------------------------------------------------------------------------------------------
+//=================================================================================================
+// component meta
+//=================================================================================================
 
-const p = withDefaults(
+const props = withDefaults(
   defineProps<{
     duration?: number
     persist?: boolean
@@ -24,18 +24,17 @@ const emit = defineEmits<{
   timerResume: []
 }>()
 
-//----------------------------------------------------------------------------------------------------
-// 📌 timer
-//----------------------------------------------------------------------------------------------------
+const swipeDismissThreshold = 0.5
 
-const NotificationEl = ref<HTMLElement | null>(null)
-const timer = !p.persist ? useTimer(p.duration, stopTimer) : undefined
+//=================================================================================================
+// timer
+//=================================================================================================
 
-if (timer) {
-  onMounted(() => {
-    timer?.start()
-    emit('timerStart')
-  })
+const timer = !props.persist ? useTimer(props.duration, stopTimer) : undefined
+
+function startTimer() {
+  timer?.start()
+  emit('timerStart')
 }
 
 function stopTimer() {
@@ -53,78 +52,60 @@ function resumeTimer() {
   emit('timerResume')
 }
 
-const isMouseInside = ref(false)
+if (timer) {
+  onMounted(startTimer)
+}
 
-useEventListener(NotificationEl, 'mouseenter', () => {
-  isMouseInside.value = true
-  pauseTimer()
-})
+//=================================================================================================
+// swipe
+//=================================================================================================
 
-useEventListener(NotificationEl, 'mouseleave', () => {
-  isMouseInside.value = false
-  if (document.activeElement !== NotificationEl.value) {
-    resumeTimer()
-  }
-})
+/*
+ * The swiping logic basically changes the position and opacity of a notification based on user interaction.
+ * When a user swipes the notification, depending on the direction and distance of the swipe,
+ * the `left` value and `opacity` value are updated.
+ * If the swipe is significant enough (meets the `swipeDismissThreshold`),
+ * the notification is fully dismissed, i.e., moved to the left end (`left.value = '100%'`)
+ * and made fully transparent (`opacity.value = 0`). If the swipe isn't significant enough,
+ * the notification returns to its initial position (`left.value = '0'`) and full opacity (`opacity.value = 1`).
+ */
 
-//----------------------------------------------------------------------------------------------------
-// 📌 swipe gesture
-//----------------------------------------------------------------------------------------------------
+const left = ref('0')
+const opacity = ref(1)
+const notificationEl = ref<HTMLElement | null>(null)
+const notificationWidth = computed(() => notificationEl.value?.offsetWidth ?? 0)
+const isSwipingRight = computed(() => lengthX.value < 0)
 
-let prevX = 0
-let initialX = 0
-let lastFrame: number | null = null
-
-useEventListener(NotificationEl, 'touchstart', (e: TouchEvent) => {
-  pauseTimer()
-  initialX = e.touches[0].clientX
-})
-
-useEventListener(NotificationEl, 'touchmove', (e: TouchEvent) => {
-  // ignore multi fingers touches
-  if (e.touches.length !== 1) return
-  e.preventDefault()
-  e.stopPropagation()
-
-  // TODO: make this code bidirectional
-  // Ignore left swipes beyond the initial position
-  // reset prevX to prevent jumps
-  if (e.touches[0].clientX < initialX) {
-    prevX = initialX
-    return
-  }
-
-  // debounce drag animation
-  if (!lastFrame) {
-    lastFrame = requestAnimationFrame(() => {
-      if (!NotificationEl.value) return
-
-      lastFrame = null
-      prevX = e.touches[0].clientX
-      const delta = Math.abs(prevX - initialX)
-      NotificationEl.value.style.transform = `translateX(${delta}px)`
-    })
-  }
-})
-
-useEventListener(NotificationEl, 'touchend', () => {
-  resumeTimer()
-  // Ignore left swipes
-  if (prevX < initialX) return
-
-  // if the swipe distance is greater than 33% of el width, close
-  const delta = Math.abs(prevX - initialX)
-  if (delta > Math.floor(NotificationEl.value!.offsetWidth / 3)) {
-    stopTimer()
-    return
-  }
-
-  // otherwise reset the element's position.
-  requestAnimationFrame(() => {
-    if (NotificationEl.value) {
-      NotificationEl.value.style.transform = `translateX(0)`
+const { isSwiping, lengthX } = useSwipe(notificationEl, {
+  passive: false,
+  onSwipeStart() {
+    pauseTimer()
+  },
+  onSwipe() {
+    if (isSwipingRight.value) {
+      const length = Math.abs(lengthX.value)
+      left.value = `${length}px`
+      opacity.value = 1.1 - length / notificationWidth.value
+    } else {
+      left.value = '0'
+      opacity.value = 1
     }
-  })
+  },
+  onSwipeEnd() {
+    if (
+      isSwipingRight.value &&
+      notificationWidth.value > 0 &&
+      Math.abs(lengthX.value) / notificationWidth.value >= swipeDismissThreshold
+    ) {
+      left.value = '100%'
+      opacity.value = 0
+      stopTimer()
+    } else {
+      left.value = '0'
+      opacity.value = 1
+      resumeTimer()
+    }
+  },
 })
 
 defineExpose({
@@ -136,11 +117,15 @@ defineExpose({
 
 <template>
   <div
-    ref="NotificationEl"
-    class="text-base rounded-sm bg-white shadow pointer-events-auto flex shrink-0 items-start gap-2 p-4 w-20rem max-w-[calc(100vw-2rem)] overflow-hidden"
+    ref="notificationEl"
+    class="relative text-base rounded-sm bg-white shadow pointer-events-auto flex shrink-0 items-start gap-2 p-4 w-20rem max-w-[calc(100vw-2rem)] overflow-hidden"
+    :class="{
+      'transition-all': !isSwiping,
+    }"
     tabindex="0"
     role="status"
-    aria-atomic
+    :style="{ left, opacity }"
+    aria-atomic="true"
     @keydown.esc="stopTimer"
     @focus="pauseTimer"
     @blur="resumeTimer"
