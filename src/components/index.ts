@@ -21,14 +21,19 @@ export interface NotificationPluginOptions {}
 
 export interface AppContext extends NotificationPluginOptions {
   notifications: Ref<NotificationItem[]>
+  removeNotification: (uuid: string) => void
 }
 
 export const APP_CONTEXT = Symbol() as InjectionKey<AppContext>
 export const notifications: Ref<NotificationItem[]> = ref([])
 
+function removeNotification(uuid: string): void {
+  notifications.value = notifications.value.filter((item) => item.uuid !== uuid)
+}
+
 export const plugin: Plugin<NotificationPluginOptions> = {
   install(app, options) {
-    app.provide(APP_CONTEXT, { ...options, notifications })
+    app.provide(APP_CONTEXT, { ...options, notifications, removeNotification })
   },
 }
 
@@ -39,11 +44,13 @@ export function useNotification() {
       const notification = { uuid, ...options }
       notifications.value.unshift(notification)
       return {
-        remove: () => remove(notifications.value, notification),
+        uuid,
+        remove: () => removeNotification(uuid),
       }
     },
     clearAllNotification: () => {
       notifications.value = []
     },
+    removeNotification,
   }
 }

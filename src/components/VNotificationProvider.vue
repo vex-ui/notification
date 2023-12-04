@@ -30,10 +30,6 @@ function onKeydown(e: KeyboardEvent) {
     NotificationProviderEl.value?.focus()
   }
 }
-
-function removeNotification(item: NotificationItem) {
-  remove(notifications.value, item)
-}
 </script>
 
 <template>
@@ -48,23 +44,6 @@ function removeNotification(item: NotificationItem) {
     aria-live="polite"
     @keydown="onKeydown"
   >
-    <TransitionGroup
-      move-class="transition-all duration-500"
-      enterActiveClass="transition-all duration-500 ease-in-out"
-      leaveActiveClass="transition-all duration-500 ease-in-out absolute"
-      enterFromClass="translate-x-full"
-      leaveToClass="translate-x-full"
-    >
-      <VNotification
-        v-for="item in notifications"
-        role="status"
-        aria-atomic="true"
-        :key="item.uuid"
-        :duration="item.duration"
-        :persist="item.persist"
-        @timer-stop="removeNotification(item)"
-        >this is a notification</VNotification
-      >
-    </TransitionGroup>
+    <slot :notifications="notifications" />
   </div>
 </template>

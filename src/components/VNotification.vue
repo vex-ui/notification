@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { onMounted, ref, computed } from 'vue'
+import { onMounted, ref, computed, inject } from 'vue'
 import { useSwipe } from '@vueuse/core'
 import { useTimer } from '@/composables'
+import { APP_CONTEXT } from '.'
 
 //=================================================================================================
 // component meta
@@ -9,8 +10,9 @@ import { useTimer } from '@/composables'
 
 const props = withDefaults(
   defineProps<{
-    duration?: number
+    uuid: string
     persist?: boolean
+    duration?: number
   }>(),
   {
     duration: 10000,
@@ -23,6 +25,13 @@ const emit = defineEmits<{
   timerPause: []
   timerResume: []
 }>()
+
+const ctx = inject(APP_CONTEXT, null)
+if (!ctx) {
+  throw new Error('[vex] app context was not found')
+}
+
+const { removeNotification } = ctx
 
 const swipeDismissThreshold = 0.5
 
@@ -39,6 +48,7 @@ function startTimer() {
 
 function stopTimer() {
   timer?.stop()
+  removeNotification(props.uuid)
   emit('timerStop')
 }
 
@@ -118,7 +128,7 @@ defineExpose({
 <template>
   <div
     ref="notificationEl"
-    class="relative text-base rounded-sm bg-white shadow pointer-events-auto flex shrink-0 items-start gap-2 p-4 w-20rem max-w-[calc(100vw-2rem)] overflow-hidden"
+    class="relative text-base rounded-sm bg-white shadow-sm pointer-events-auto flex shrink-0 items-start gap-2 p-4 w-20rem max-w-[calc(100vw-2rem)] overflow-hidden"
     :class="{
       'transition-all': !isSwiping,
     }"
@@ -127,6 +137,8 @@ defineExpose({
     :style="{ left, opacity }"
     aria-atomic="true"
     @keydown.esc="stopTimer"
+    @mouseenter="pauseTimer"
+    @mouseleave="resumeTimer"
     @focus="pauseTimer"
     @blur="resumeTimer"
   >
