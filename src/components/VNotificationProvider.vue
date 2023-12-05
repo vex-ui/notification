@@ -17,7 +17,7 @@ const props = withDefaults(
 
 const ctx = inject(APP_CONTEXT, null)
 if (!ctx) {
-  throw new Error('[vex] app context was not found')
+  throw new Error('[vex] notifications app context was not found')
 }
 const { notifications, dismiss } = ctx
 
@@ -33,9 +33,7 @@ function onKeydown(e: KeyboardEvent) {
 <template>
   <div
     ref="NotificationProviderEl"
-    id="vex-notification-provider"
     aria-label="Notifications (F8)"
-    class="fixed top-0 left-0 w-screen h-screen p-4 overflow-hidden pointer-events-none flex flex-col justify-start items-end gap-4 z-1000"
     v-bind="$attrs"
     tabindex="-1"
     role="region"

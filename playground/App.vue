@@ -5,7 +5,7 @@ import VNotificationProvider from '../src/components/VNotificationProvider.vue'
 import VNotification from '../src/components/VNotification.vue'
 // import TransitionDemo from './TransitionDemo.vue'
 
-const { notify, clearAllNotification } = useNotification()
+const { notify, dismissAllNotifications, dismiss } = useNotification()
 
 let count = 0
 const send = () => {
@@ -14,6 +14,11 @@ const send = () => {
     body: 'body' + ++count,
     duration: 20000,
   })
+}
+
+const onClick = (uuid: string) => {
+  dismiss(uuid)
+  console.log('clicked')
 }
 </script>
 
@@ -27,7 +32,10 @@ const send = () => {
     </button>
 
     <Teleport to="body">
-      <VNotificationProvider #="{ notifications, removeNotification }">
+      <VNotificationProvider
+        class="fixed top-0 left-0 w-screen h-screen p-4 overflow-hidden pointer-events-none flex flex-col justify-start items-end gap-4 z-1000"
+        #="{ notifications, dismiss }"
+      >
         <TransitionGroup
           enterActiveClass="transition-all duration-500 ease-in-out"
           leaveActiveClass="transition-all duration-500 ease-in-out absolute"
@@ -36,16 +44,12 @@ const send = () => {
         >
           <VNotification
             v-for="item in notifications"
-            role="status"
-            aria-atomic="true"
-            :uuid="item.uuid"
             :key="item.uuid"
-            :duration="item.duration"
-            :persist="item.persist"
+            v-bind="item"
             class="opacity-50 items-center justify-between border-1 border-solid border-gray relative text-base rounded-sm bg-white shadow-sm pointer-events-auto flex shrink-0 items-start gap-2 p-4 w-20rem max-w-[calc(100vw-2rem)] overflow-hidden"
           >
             this is a notification
-            <button @click="removeNotification(item.uuid)" aria-label="close">
+            <button @pointerdown="onClick(item.uuid)" aria-label="close">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="18"
