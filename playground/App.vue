@@ -12,7 +12,7 @@ const send = () => {
   notify({
     title: 'title',
     body: 'body' + ++count,
-    duration: 2000,
+    duration: 20000,
   })
 }
 </script>
@@ -27,7 +27,7 @@ const send = () => {
     </button>
 
     <Teleport to="body">
-      <VNotificationProvider #="{ notifications }">
+      <VNotificationProvider #="{ notifications, removeNotification }">
         <TransitionGroup
           enterActiveClass="transition-all duration-500 ease-in-out"
           leaveActiveClass="transition-all duration-500 ease-in-out absolute"
@@ -42,7 +42,26 @@ const send = () => {
             :key="item.uuid"
             :duration="item.duration"
             :persist="item.persist"
-            >this is a notification
+            class="opacity-50 items-center justify-between border-1 border-solid border-gray relative text-base rounded-sm bg-white shadow-sm pointer-events-auto flex shrink-0 items-start gap-2 p-4 w-20rem max-w-[calc(100vw-2rem)] overflow-hidden"
+          >
+            this is a notification
+            <button @click="removeNotification(item.uuid)" aria-label="close">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="gray"
+                stroke-width="1"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                class="feather feather-x"
+              >
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+            </button>
           </VNotification>
         </TransitionGroup>
       </VNotificationProvider>

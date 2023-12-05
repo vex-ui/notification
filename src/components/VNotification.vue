@@ -31,9 +31,7 @@ if (!ctx) {
   throw new Error('[vex] app context was not found')
 }
 
-const { removeNotification } = ctx
-
-const swipeDismissThreshold = 0.5
+const { removeNotification, swipeThreshold } = ctx
 
 //=================================================================================================
 // timer
@@ -80,8 +78,7 @@ if (timer) {
  * the notification returns to its initial position (`left.value = '0'`) and full opacity (`opacity.value = 1`).
  */
 
-const left = ref('0')
-const opacity = ref(1)
+const left = ref()
 const notificationEl = ref<HTMLElement | null>(null)
 const notificationWidth = computed(() => notificationEl.value?.offsetWidth ?? 0)
 const isSwipingRight = computed(() => lengthX.value < 0)
@@ -95,26 +92,21 @@ const { isSwiping, lengthX } = useSwipe(notificationEl, {
     if (isSwipingRight.value) {
       const length = Math.abs(lengthX.value)
       left.value = `${length}px`
-      opacity.value = 1.1 - length / notificationWidth.value
     } else {
-      left.value = '0'
-      opacity.value = 1
+      left.value = undefined
     }
   },
   onSwipeEnd() {
     if (
       isSwipingRight.value &&
       notificationWidth.value > 0 &&
-      Math.abs(lengthX.value) / notificationWidth.value >= swipeDismissThreshold
+      Math.abs(lengthX.value) / notificationWidth.value >= swipeThreshold
     ) {
-      left.value = '100%'
-      opacity.value = 0
       stopTimer()
     } else {
-      left.value = '0'
-      opacity.value = 1
       resumeTimer()
     }
+    left.value = undefined
   },
 })
 
@@ -128,13 +120,9 @@ defineExpose({
 <template>
   <div
     ref="notificationEl"
-    class="relative text-base rounded-sm bg-white shadow-sm pointer-events-auto flex shrink-0 items-start gap-2 p-4 w-20rem max-w-[calc(100vw-2rem)] overflow-hidden"
-    :class="{
-      'transition-all': !isSwiping,
-    }"
     tabindex="0"
     role="status"
-    :style="{ left, opacity }"
+    :style="{ left }"
     aria-atomic="true"
     @keydown.esc="stopTimer"
     @mouseenter="pauseTimer"

@@ -12,14 +12,15 @@ export interface NotifyOptions {
   hideProgress?: boolean
   customContent?: Component
 }
-
 export interface NotificationItem extends NotifyOptions {
   uuid: string
 }
 
-export interface NotificationPluginOptions {}
+export interface PluginOptions {
+  swipeThreshold?: number
+}
 
-export interface AppContext extends NotificationPluginOptions {
+export interface AppContext extends Required<PluginOptions> {
   notifications: Ref<NotificationItem[]>
   removeNotification: (uuid: string) => void
 }
@@ -31,9 +32,10 @@ function removeNotification(uuid: string): void {
   notifications.value = notifications.value.filter((item) => item.uuid !== uuid)
 }
 
-export const plugin: Plugin<NotificationPluginOptions> = {
-  install(app, options) {
-    app.provide(APP_CONTEXT, { ...options, notifications, removeNotification })
+export const plugin: Plugin<PluginOptions> = {
+  install(app, options = {}) {
+    const { swipeThreshold = 0.5 } = options
+    app.provide(APP_CONTEXT, { swipeThreshold, notifications, removeNotification })
   },
 }
 
