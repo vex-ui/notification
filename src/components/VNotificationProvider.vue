@@ -1,8 +1,6 @@
 <script setup lang="ts">
 import { inject, ref } from 'vue'
-import VNotification from './VNotification.vue'
-import { APP_CONTEXT, type NotificationItem } from '.'
-import { remove } from '@/utils'
+import { APP_CONTEXT } from '.'
 
 defineOptions({
   inheritAttrs: false,
@@ -21,7 +19,7 @@ const ctx = inject(APP_CONTEXT, null)
 if (!ctx) {
   throw new Error('[vex] app context was not found')
 }
-const { notifications, removeNotification } = ctx
+const { notifications, dismiss } = ctx
 
 const NotificationProviderEl = ref<HTMLElement | null>(null)
 
@@ -44,6 +42,6 @@ function onKeydown(e: KeyboardEvent) {
     aria-live="polite"
     @keydown="onKeydown"
   >
-    <slot :notifications="notifications" :remove-notification="removeNotification" />
+    <slot :notifications="notifications" :dismiss="dismiss" />
   </div>
 </template>

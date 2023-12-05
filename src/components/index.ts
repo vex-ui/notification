@@ -22,20 +22,20 @@ export interface PluginOptions {
 
 export interface AppContext extends Required<PluginOptions> {
   notifications: Ref<NotificationItem[]>
-  removeNotification: (uuid: string) => void
+  dismiss: (uuid: string) => void
 }
 
 export const APP_CONTEXT = Symbol() as InjectionKey<AppContext>
 export const notifications: Ref<NotificationItem[]> = ref([])
 
-function removeNotification(uuid: string): void {
+function dismiss(uuid: string): void {
   notifications.value = notifications.value.filter((item) => item.uuid !== uuid)
 }
 
 export const plugin: Plugin<PluginOptions> = {
   install(app, options = {}) {
     const { swipeThreshold = 0.5 } = options
-    app.provide(APP_CONTEXT, { swipeThreshold, notifications, removeNotification })
+    app.provide(APP_CONTEXT, { swipeThreshold, notifications, dismiss })
   },
 }
 
@@ -47,12 +47,12 @@ export function useNotification() {
       notifications.value.unshift(notification)
       return {
         uuid,
-        remove: () => removeNotification(uuid),
+        remove: () => dismiss(uuid),
       }
     },
-    clearAllNotification: () => {
+    dismissAllNotifications: () => {
       notifications.value = []
     },
-    removeNotification,
+    dismiss,
   }
 }

@@ -31,7 +31,7 @@ if (!ctx) {
   throw new Error('[vex] app context was not found')
 }
 
-const { removeNotification, swipeThreshold } = ctx
+const { dismiss, swipeThreshold } = ctx
 
 //=================================================================================================
 // timer
@@ -46,7 +46,7 @@ function startTimer() {
 
 function stopTimer() {
   timer?.stop()
-  removeNotification(props.uuid)
+  dismiss(props.uuid)
   emit('timerStop')
 }
 
@@ -83,7 +83,7 @@ const notificationEl = ref<HTMLElement | null>(null)
 const notificationWidth = computed(() => notificationEl.value?.offsetWidth ?? 0)
 const isSwipingRight = computed(() => lengthX.value < 0)
 
-const { isSwiping, lengthX } = useSwipe(notificationEl, {
+const { lengthX } = useSwipe(notificationEl, {
   passive: false,
   onSwipeStart() {
     pauseTimer()
