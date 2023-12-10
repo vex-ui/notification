@@ -66,13 +66,13 @@ if (timer) {
 //=================================================================================================
 
 /*
- * The swiping logic basically changes the position and opacity of a notification based on user interaction.
+ * The swiping logic basically changes the position of a notification based on user interaction.
  * When a user swipes the notification, depending on the direction and distance of the swipe,
- * the `left` value and `opacity` value are updated.
- * If the swipe is significant enough (meets the `swipeDismissThreshold`),
+ * the `left` value is updated.
+ * If the swipe is significant enough (meets the `swipeThreshold`),
  * the notification is fully dismissed, i.e., moved to the left end (`left.value = '100%'`)
- * and made fully transparent (`opacity.value = 0`). If the swipe isn't significant enough,
- * the notification returns to its initial position (`left.value = '0'`) and full opacity (`opacity.value = 1`).
+ * If the swipe isn't significant enough,
+ * the notification returns to its initial position (`left.value = '0'`).
  */
 
 const left = ref()
