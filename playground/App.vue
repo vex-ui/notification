@@ -5,7 +5,7 @@ import VNotificationProvider from '../src/components/VNotificationProvider.vue'
 import VNotification from '../src/components/VNotification.vue'
 // import TransitionDemo from './TransitionDemo.vue'
 
-const { notify, notifications } = useNotification<{
+const { notify, notifications, dismiss } = useNotification<{
   title: string
   body?: string
 }>()
@@ -34,7 +34,6 @@ const send = () => {
     <Teleport to="body">
       <VNotificationProvider
         class="fixed top-0 left-0 w-screen h-screen p-4 overflow-hidden pointer-events-none flex flex-col justify-start items-end gap-4 z-1000"
-        #="{ dismiss }"
       >
         <TransitionGroup
           enterActiveClass="transition-all duration-500 ease-in-out"

@@ -1,19 +1,17 @@
 import { useID } from '@/composables'
 import type { Plugin, Ref } from 'vue'
 import { readonly, ref } from 'vue'
-import { GLOBAL_INJECTION_KEY } from './GlobalContext'
+import { DEFAULT_NOTIFICATION_CONTEXT_UID, useNotificationContext } from './Context'
 
-export interface PluginOptions {}
-
-export const notifications: Ref<NotificationItem[]> = ref([])
-
-function dismiss(uuid: string): void {
-  notifications.value = notifications.value.filter((item) => item.uuid !== uuid)
+export interface PluginOptions {
+  uid?: string | symbol
 }
 
 export const plugin: Plugin<PluginOptions> = {
   install(app, options = {}) {
-    app.provide(GLOBAL_INJECTION_KEY, { ...options, notifications, dismiss })
+    const { uid } = options
+    const notifications: Ref<NotificationItem[]> = ref([])
+    app.provide(uid ?? DEFAULT_NOTIFICATION_CONTEXT_UID, { uid, notifications })
   },
 }
 
@@ -29,7 +27,9 @@ export interface NotificationItem<T extends Record<string, any> = Record<string,
   meta: T
 }
 
-export function useNotification<T extends Record<string, any>>() {
+export function useNotification<T extends Record<string, any>>(uid?: string | symbol) {
+  const { notifications } = useNotificationContext(uid)
+
   const notify = (meta: T, options: NotifyOptions) => {
     const uuid = useID()
     const notification: NotificationItem = { uuid, ...options, meta }
@@ -38,6 +38,10 @@ export function useNotification<T extends Record<string, any>>() {
       uuid,
       dismiss: () => dismiss(uuid),
     }
+  }
+
+  const dismiss = (uuid: string) => {
+    notifications.value = notifications.value.filter((item) => item.uuid !== uuid)
   }
 
   const dismissAllNotifications = () => {

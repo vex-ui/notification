@@ -2,7 +2,6 @@
 import { onMounted, ref, computed } from 'vue'
 import { useSwipe } from '@vueuse/core'
 import { useTimer } from '@/composables'
-import { useGlobalContext } from './GlobalContext'
 
 //=================================================================================================
 // component meta
@@ -28,8 +27,6 @@ const emit = defineEmits<{
   timerResume: []
 }>()
 
-const { dismiss } = useGlobalContext()
-
 //=================================================================================================
 // timer
 //=================================================================================================
@@ -43,7 +40,6 @@ function startTimer() {
 
 function stopTimer() {
   timer?.stop()
-  dismiss(props.uuid)
   emit('timerStop')
 }
 

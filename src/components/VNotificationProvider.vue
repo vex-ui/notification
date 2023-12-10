@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { useGlobalContext } from './GlobalContext'
 
 defineOptions({
   inheritAttrs: false,
@@ -14,8 +13,6 @@ const props = withDefaults(
     focusKey: 'F8',
   }
 )
-
-const { notifications, dismiss } = useGlobalContext()
 
 const NotificationProviderEl = ref<HTMLElement | null>(null)
 
@@ -36,6 +33,6 @@ function onKeydown(e: KeyboardEvent) {
     aria-live="polite"
     @keydown="onKeydown"
   >
-    <slot :notifications="notifications" :dismiss="dismiss" />
+    <slot />
   </div>
 </template>
