@@ -1,7 +1,7 @@
 import { useContext } from '@/Context'
 import { readonly, type Ref } from 'vue'
-import { useID } from '.'
-import type { NotifyOptions, NotificationItem } from '..'
+import { useID } from './use-id'
+import type { NotifyOptions, NotificationItem } from '@/plugin'
 
 export function useNotification<T extends Record<string, any>>(uid?: string | symbol) {
   const { notifications } = useContext(uid)
