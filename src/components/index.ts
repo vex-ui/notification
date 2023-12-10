@@ -3,9 +3,7 @@ import type { Plugin, Ref } from 'vue'
 import { readonly, ref } from 'vue'
 import { GLOBAL_INJECTION_KEY } from './GlobalContext'
 
-export interface PluginOptions {
-  swipeThreshold?: number
-}
+export interface PluginOptions {}
 
 export const notifications: Ref<NotificationItem[]> = ref([])
 
@@ -15,8 +13,7 @@ function dismiss(uuid: string): void {
 
 export const plugin: Plugin<PluginOptions> = {
   install(app, options = {}) {
-    const { swipeThreshold = 0.5 } = options
-    app.provide(GLOBAL_INJECTION_KEY, { swipeThreshold, notifications, dismiss })
+    app.provide(GLOBAL_INJECTION_KEY, { ...options, notifications, dismiss })
   },
 }
 

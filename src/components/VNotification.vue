@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref, computed, inject } from 'vue'
+import { onMounted, ref, computed } from 'vue'
 import { useSwipe } from '@vueuse/core'
 import { useTimer } from '@/composables'
 import { useGlobalContext } from './GlobalContext'
@@ -13,9 +13,11 @@ const props = withDefaults(
     uuid: string
     persist?: boolean
     duration?: number
+    swipeThreshold?: number
   }>(),
   {
     duration: 10000,
+    swipeThreshold: 0.5,
   }
 )
 
@@ -26,7 +28,7 @@ const emit = defineEmits<{
   timerResume: []
 }>()
 
-const { dismiss, swipeThreshold } = useGlobalContext()
+const { dismiss } = useGlobalContext()
 
 //=================================================================================================
 // timer
@@ -95,7 +97,7 @@ const { lengthX } = useSwipe(notificationEl, {
     if (
       isSwipingRight.value &&
       notificationWidth.value > 0 &&
-      Math.abs(lengthX.value) / notificationWidth.value >= swipeThreshold
+      Math.abs(lengthX.value) / notificationWidth.value >= props.swipeThreshold
     ) {
       stopTimer()
     } else {
