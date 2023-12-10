@@ -5,20 +5,20 @@ import VNotificationProvider from '../src/components/VNotificationProvider.vue'
 import VNotification from '../src/components/VNotification.vue'
 // import TransitionDemo from './TransitionDemo.vue'
 
-const { notify, dismissAllNotifications, dismiss } = useNotification()
+const { notify, notifications } = useNotification<{
+  title: string
+  body?: string
+}>()
 
-let count = 0
 const send = () => {
-  notify({
-    title: 'title',
-    body: 'body' + ++count,
-    duration: 20000,
-  })
-}
-
-const onClick = (uuid: string) => {
-  dismiss(uuid)
-  console.log('clicked')
+  notify(
+    {
+      title: 'hello world',
+    },
+    {
+      duration: 20000,
+    }
+  )
 }
 </script>
 
@@ -34,7 +34,7 @@ const onClick = (uuid: string) => {
     <Teleport to="body">
       <VNotificationProvider
         class="fixed top-0 left-0 w-screen h-screen p-4 overflow-hidden pointer-events-none flex flex-col justify-start items-end gap-4 z-1000"
-        #="{ notifications, dismiss }"
+        #="{ dismiss }"
       >
         <TransitionGroup
           enterActiveClass="transition-all duration-500 ease-in-out"
@@ -48,8 +48,12 @@ const onClick = (uuid: string) => {
             v-bind="item"
             class="opacity-50 items-center justify-between border-1 border-solid border-gray relative text-base rounded-sm bg-white shadow-sm pointer-events-auto flex shrink-0 items-start gap-2 p-4 w-20rem max-w-[calc(100vw-2rem)] overflow-hidden"
           >
-            this is a notification
-            <button @pointerdown="onClick(item.uuid)" aria-label="close">
+            <div>
+              <h2>{{ item.meta.title }}</h2>
+              <p>{{ item.meta.body }}</p>
+            </div>
+
+            <button @pointerdown="dismiss(item.uuid)" aria-label="close">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="18"

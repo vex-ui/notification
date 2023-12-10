@@ -2,7 +2,7 @@
 import { onMounted, ref, computed, inject } from 'vue'
 import { useSwipe } from '@vueuse/core'
 import { useTimer } from '@/composables'
-import { APP_CONTEXT } from '.'
+import { useGlobalContext } from './GlobalContext'
 
 //=================================================================================================
 // component meta
@@ -26,12 +26,7 @@ const emit = defineEmits<{
   timerResume: []
 }>()
 
-const ctx = inject(APP_CONTEXT, null)
-if (!ctx) {
-  throw new Error('[vex] app context was not found')
-}
-
-const { dismiss, swipeThreshold } = ctx
+const { dismiss, swipeThreshold } = useGlobalContext()
 
 //=================================================================================================
 // timer

@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { inject, ref } from 'vue'
-import { APP_CONTEXT } from '.'
+import { ref } from 'vue'
+import { useGlobalContext } from './GlobalContext'
 
 defineOptions({
   inheritAttrs: false,
@@ -15,11 +15,7 @@ const props = withDefaults(
   }
 )
 
-const ctx = inject(APP_CONTEXT, null)
-if (!ctx) {
-  throw new Error('[vex] notifications app context was not found')
-}
-const { notifications, dismiss } = ctx
+const { notifications, dismiss } = useGlobalContext()
 
 const NotificationProviderEl = ref<HTMLElement | null>(null)
 
