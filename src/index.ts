@@ -1,7 +1,7 @@
-import { useNotification } from '@/composables'
-import { plugin } from './plugin'
-import VNotification from '@/components/VNotification.vue'
-import VNotificationProvider from '@/components/VNotificationProvider.vue'
+export { useNotification } from '@/composables'
+export { VNotification, VNotificationProvider } from './components'
 
+import { plugin } from './plugin'
 export default plugin
-export { useNotification, VNotification, VNotificationProvider }
+
+export type { NotificationItem, NotifyOptions, PluginOptions } from '@/plugin'
