@@ -1,5 +1,5 @@
 import { inject, type Ref } from 'vue'
-import type { PluginOptions, NotificationItem } from '.'
+import type { PluginOptions, NotificationItem } from '@/plugin'
 
 export interface NotificationContext extends Required<PluginOptions> {
   notifications: Ref<NotificationItem[]>
@@ -8,7 +8,7 @@ export interface NotificationContext extends Required<PluginOptions> {
 
 export const DEFAULT_NOTIFICATION_CONTEXT_UID = 'vex-notification-default-uid'
 
-export function useNotificationContext(uid?: string | symbol) {
+export function useContext(uid?: string | symbol) {
   const ctx = inject<NotificationContext | null>(uid ?? DEFAULT_NOTIFICATION_CONTEXT_UID, null)
   if (!ctx) {
     throw new Error(
