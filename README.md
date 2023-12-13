@@ -21,12 +21,12 @@ app.use(VexPlugin, {})
 app.mount()
 ```
 
-3. use the `useNotification` composable to access the `notify` and `notifications` data,
+2. use the `useNotification` composable to access the `notify` and `notifications` data,
    then use the `Notification` component to display the notifications, and `dismiss` to dismiss them.
 
-```vue
-// App.vue import { useNotification } from '@vex/notification' const { notify, notifications,
-dismiss } = useNotification()
+```tsx
+import { useNotification } from '@vex/notification'
+const { notify, notifications, dismiss } = useNotification()
 
 <template>
   <NotificationProvider>
@@ -40,12 +40,25 @@ dismiss } = useNotification()
 </template>
 ```
 
-4. use the `notify` function to display a notification.
+3. use the `notify` function to display a notification.
 
-```ts
+```tsx
 import { useNotification } from '@vex/notification'
+const { notify, notifications } = useNotification()
 
-const { notify } = useNotification()
+// anything you pass on the first argument will be available inside item.meta in the template.
+notify({ message: 'Hello!' }, { duration: 3000 })
 
-notify({ message: 'Hello!' })
+<template>
+  <NotificationProvider>
+    <Notification
+      @timer-end="dismiss(item.uuid)"
+      v-for="item in notifications"
+      v-bind="item"
+      :key="item.uuid"
+    >
+      <h2>{{ item.meta.message }}</h2>
+    </Notification>
+  </NotificationProvider>
+</template>
 ```
