@@ -1,5 +1,5 @@
 {
-  "name": "@vex/notification",
+  "name": "@vex-ui/notification",
   "version": "0.1.0",
   "private": false,
   "types": "dist/index.d.ts",
