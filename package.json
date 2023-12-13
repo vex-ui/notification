@@ -1,7 +1,7 @@
 {
-  "name": "notification",
-  "version": "0.0.0",
-  "private": true,
+  "name": "@vex/notification",
+  "version": "0.1.0",
+  "private": false,
   "types": "dist/index.d.ts",
   "type": "module",
   "entry": "dist/index.js",
