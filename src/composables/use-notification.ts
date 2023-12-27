@@ -4,11 +4,11 @@ import { useID } from './use-id'
 import type { NotifyOptions, NotificationItem } from '@/plugin'
 
 export function useNotification<T extends Record<string, any>>(uid?: string | symbol) {
-  const { notifications } = useContext(uid)
+  const { notifications } = useContext<T>(uid)
 
   const notify = (meta: T, options: NotifyOptions) => {
     const uuid = useID()
-    const notification: NotificationItem = { uuid, ...options, meta }
+    const notification: NotificationItem<T> = { uuid, ...options, meta }
     notifications.value.unshift(notification)
     return {
       uuid,
@@ -28,6 +28,6 @@ export function useNotification<T extends Record<string, any>>(uid?: string | sy
     notify,
     dismiss,
     dismissAllNotifications,
-    notifications: readonly(notifications as Ref<NotificationItem<T>[]>),
+    notifications: readonly(notifications),
   }
 }
