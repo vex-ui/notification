@@ -1,5 +1,6 @@
 {
   "name": "@vex-ui/notification",
+  "version": "0.1.2",
   "description": "A simple and customizable notification system for Vue 3 applications.",
   "author": {
     "name": "Shareef Hassan",
@@ -16,7 +17,6 @@
     "dist/**/*"
   ],
   "license": "MIT",
-  "version": "0.1.1",
   "private": false,
   "types": "dist/index.d.ts",
   "type": "module",
