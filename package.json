@@ -1,10 +1,23 @@
 {
   "name": "@vex-ui/notification",
+  "description": "A simple and customizable notification system for Vue 3 applications.",
+  "author": {
+    "name": "Shareef Hassan",
+    "email": "shareef.hassan.dev@gmail.com",
+    "url": "https://shareef.pages.dev"
+  },
+  "keywords": [
+    "vue",
+    "vue3",
+    "notification",
+    "vex"
+  ],
+  "license": "MIT",
   "version": "0.1.0",
   "private": false,
   "types": "dist/index.d.ts",
   "type": "module",
-  "entry": "dist/index.js",
+  "module": "dist/index.js",
   "scripts": {
     "dev": "vite",
     "build": "run-p type-check \"build-only {@}\" --",
