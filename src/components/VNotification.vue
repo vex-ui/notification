@@ -13,10 +13,12 @@ const props = withDefaults(
     persist?: boolean
     duration?: number
     swipeThreshold?: number
+    swipeVelocityThreshold?: number
   }>(),
   {
     duration: 10000,
     swipeThreshold: 0.5,
+    swipeVelocityThreshold: 0.2,
   }
 )
 
@@ -62,45 +64,58 @@ if (timer) {
 //=================================================================================================
 
 /*
- * The swiping logic basically changes the position of a notification based on user interaction.
- * When a user swipes the notification, depending on the direction and distance of the swipe,
- * the `left` value is updated.
- * If the swipe is significant enough (meets the `swipeThreshold`),
- * the notification is fully dismissed, i.e., moved to the left end (`left.value = '100%'`)
- * If the swipe isn't significant enough,
- * the notification returns to its initial position (`left.value = '0'`).
+ * The swiping logic is responsible for handling user interactions with the notification.
+ * It primarily focuses on the changes in the notification's position as a user swipes it.
+ *
+ * The logic works as follows:
+ * 1. When a user starts swiping the notification, the swipe start time is recorded and the notification's timer is paused.
+ * 2. As the user continues to swipe, the notification's position is updated based on the swipe direction and distance.
+ * 3. If the user is swiping to the right, the `positionX` value is set to the swipe distance.
+ * 4. If the user is not swiping to the right, the `positionX` value is reset.
+ * 5. When the user ends the swipe, the swipe end time is recorded. The swipe duration and velocity are then calculated.
+ * 6. If the user swiped to the right and the swipe was either significant enough (i.e., the swipe distance divided by the notification width is greater than or equal to the `swipeThreshold`)
+ *    or fast enough (i.e., the swipe velocity is greater than or equal to a defined velocity threshold), the notification's timer is stopped.
+ * 7. If the swipe was not significant or fast enough, the notification's timer is resumed and the notification returns to its initial position.
  */
 
-const left = ref()
+const positionX = ref('')
 const notificationEl = ref<HTMLElement | null>(null)
-const notificationWidth = computed(() => notificationEl.value?.offsetWidth ?? 0)
+const width = computed(() => notificationEl.value?.offsetWidth ?? 0)
 const isSwipingRight = computed(() => lengthX.value < 0)
+
+let swipeStartTime: number
 
 const { lengthX } = useSwipe(notificationEl, {
   passive: false,
   onSwipeStart() {
     pauseTimer()
+    swipeStartTime = Date.now()
   },
   onSwipe() {
     if (isSwipingRight.value) {
       const length = Math.abs(lengthX.value)
-      left.value = `${length}px`
+      positionX.value = `${length}px`
     } else {
-      left.value = undefined
+      positionX.value = ''
     }
   },
   onSwipeEnd() {
-    if (
-      isSwipingRight.value &&
-      notificationWidth.value > 0 &&
-      Math.abs(lengthX.value) / notificationWidth.value >= props.swipeThreshold
-    ) {
+    const swipeEndTime = Date.now()
+    const swipeDuration = swipeEndTime - swipeStartTime
+    const swipeVelocity = Math.abs(lengthX.value) / swipeDuration
+    const swipeDistance = Math.abs(lengthX.value) / width.value
+
+    const isSwipeDistanceSufficient = width.value > 0 && swipeDistance >= props.swipeThreshold
+    const isSwipeFastEnough = swipeVelocity >= props.swipeVelocityThreshold
+
+    if (isSwipingRight.value && (isSwipeDistanceSufficient || isSwipeFastEnough)) {
       stopTimer()
     } else {
       resumeTimer()
     }
-    left.value = undefined
+    positionX.value = ''
   },
+  threshold: 1,
 })
 
 defineExpose({
@@ -115,7 +130,7 @@ defineExpose({
     ref="notificationEl"
     tabindex="0"
     role="status"
-    :style="{ left }"
+    :style="{ left: positionX }"
     aria-atomic="true"
     @keydown.esc="stopTimer"
     @mouseenter="pauseTimer"
