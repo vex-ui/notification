@@ -81,42 +81,45 @@ if (timer) {
 const positionX = ref('')
 const notificationEl = ref<HTMLElement | null>(null)
 const width = computed(() => notificationEl.value?.offsetWidth ?? 0)
-const isSwipingRight = computed(() => lengthX.value < 0)
 
 let swipeStartTime: number
 
-const { lengthX } = useSwipe(notificationEl, {
-  passive: false,
-  onSwipeStart() {
-    pauseTimer()
-    swipeStartTime = Date.now()
-  },
-  onSwipe() {
-    if (isSwipingRight.value) {
-      const length = Math.abs(lengthX.value)
-      positionX.value = `${length}px`
-    } else {
+if (!props.persist) {
+  const isSwipingRight = computed(() => lengthX.value < 0)
+
+  const { lengthX } = useSwipe(notificationEl, {
+    onSwipeStart() {
+      pauseTimer()
+      swipeStartTime = Date.now()
+    },
+    onSwipe() {
+      if (isSwipingRight.value) {
+        const length = Math.abs(lengthX.value)
+        positionX.value = `${length}px`
+      } else {
+        positionX.value = ''
+      }
+    },
+    onSwipeEnd() {
+      const swipeEndTime = Date.now()
+      const swipeDuration = swipeEndTime - swipeStartTime
+      const swipeVelocity = Math.abs(lengthX.value) / swipeDuration
+      const swipeDistance = Math.abs(lengthX.value) / width.value
+
+      const isSwipeDistanceSufficient = width.value > 0 && swipeDistance >= props.swipeThreshold
+      const isSwipeFastEnough = swipeVelocity >= props.swipeVelocityThreshold
+
+      if (isSwipingRight.value && (isSwipeDistanceSufficient || isSwipeFastEnough)) {
+        stopTimer()
+      } else {
+        resumeTimer()
+      }
       positionX.value = ''
-    }
-  },
-  onSwipeEnd() {
-    const swipeEndTime = Date.now()
-    const swipeDuration = swipeEndTime - swipeStartTime
-    const swipeVelocity = Math.abs(lengthX.value) / swipeDuration
-    const swipeDistance = Math.abs(lengthX.value) / width.value
-
-    const isSwipeDistanceSufficient = width.value > 0 && swipeDistance >= props.swipeThreshold
-    const isSwipeFastEnough = swipeVelocity >= props.swipeVelocityThreshold
-
-    if (isSwipingRight.value && (isSwipeDistanceSufficient || isSwipeFastEnough)) {
-      stopTimer()
-    } else {
-      resumeTimer()
-    }
-    positionX.value = ''
-  },
-  threshold: 1,
-})
+    },
+    threshold: 1,
+    passive: false,
+  })
+}
 
 defineExpose({
   stopTimer,
