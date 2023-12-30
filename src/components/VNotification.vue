@@ -2,6 +2,7 @@
 import { onMounted, ref, computed } from 'vue'
 import { useSwipe } from '@vueuse/core'
 import { useTimer } from '@/composables'
+import { useNotificationProviderContext } from './VNotificationProvider.vue'
 
 //=================================================================================================
 // component meta
@@ -12,14 +13,8 @@ const props = withDefaults(
     uuid: string
     persist?: boolean
     duration?: number
-    swipeThreshold?: number
-    swipeVelocityThreshold?: number
   }>(),
-  {
-    duration: 10000,
-    swipeThreshold: 0.5,
-    swipeVelocityThreshold: 0.2,
-  }
+  {}
 )
 
 const emit = defineEmits<{
@@ -29,11 +24,15 @@ const emit = defineEmits<{
   timerResume: []
 }>()
 
+const { swipeThreshold, swipeVelocityThreshold, defaultDuration } = useNotificationProviderContext()
+
 //=================================================================================================
 // timer
 //=================================================================================================
 
-const timer = !props.persist ? useTimer(props.duration, stopTimer) : undefined
+const timer = !props.persist
+  ? useTimer(props.duration ?? defaultDuration.value, stopTimer)
+  : undefined
 
 function startTimer() {
   timer?.start()
@@ -106,10 +105,10 @@ if (!props.persist) {
       const swipeVelocity = Math.abs(lengthX.value) / swipeDuration
       const swipeDistance = Math.abs(lengthX.value) / width.value
 
-      const isSwipeDistanceSufficient = width.value > 0 && swipeDistance >= props.swipeThreshold
-      const isSwipeFastEnough = swipeVelocity >= props.swipeVelocityThreshold
+      const isSwipeDistanceSufficient = width.value > 0 && swipeDistance >= swipeThreshold.value
+      const isSwipeVelocitySufficient = swipeVelocity >= swipeVelocityThreshold.value
 
-      if (isSwipingRight.value && (isSwipeDistanceSufficient || isSwipeFastEnough)) {
+      if (isSwipingRight.value && (isSwipeDistanceSufficient || isSwipeVelocitySufficient)) {
         stopTimer()
       } else {
         resumeTimer()
