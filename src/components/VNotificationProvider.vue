@@ -21,8 +21,7 @@ export function useNotificationProviderContext(): NotificationProviderContext {
 </script>
 
 <script setup lang="ts">
-import { useTextDirection } from '@vueuse/core'
-import { ref, type InjectionKey, inject, provide, toRef, type Ref, computed } from 'vue'
+import { inject, provide, ref, toRef, type InjectionKey, type Ref } from 'vue'
 
 defineOptions({
   inheritAttrs: false,
@@ -46,17 +45,9 @@ const props = withDefaults(
 )
 
 const NotificationProviderEl = ref<HTMLElement | null>(null)
-const dir = useTextDirection()
-const swipeDismissDir = computed(() => {
-  if (['left', 'right'].includes(props.swipeDismissDir)) {
-    return dir.value === 'rtl' ? 'left' : 'right'
-  } else {
-    return props.swipeDismissDir
-  }
-})
 
 provide(NOTIFICATION_PROVIDER_KEY, {
-  swipeDismissDir,
+  swipeDismissDir: toRef(() => props.swipeDismissDir),
   swipeThreshold: toRef(() => props.swipeThreshold),
   defaultDuration: toRef(() => props.defaultDuration),
   swipeVelocityThreshold: toRef(() => props.swipeVelocityThreshold),

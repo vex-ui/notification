@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { onMounted, ref, computed, watch } from 'vue'
-import { useSwipe, useTextDirection } from '@vueuse/core'
 import { useTimer } from '@/composables'
-import { useNotificationProviderContext, type Directions } from './VNotificationProvider.vue'
+import { useSwipe } from '@vueuse/core'
+import { computed, onMounted, ref } from 'vue'
+import { useNotificationProviderContext } from './VNotificationProvider.vue'
 
 const props = withDefaults(
   defineProps<{
