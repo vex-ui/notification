@@ -1,15 +1,18 @@
-<script>
+<script lang="ts">
+export type Directions = 'up' | 'down' | 'left' | 'right' | 'none'
+
 export interface NotificationProviderContext {
   swipeThreshold: Ref<number>
+  swipeDismissDir: Ref<Directions>
   defaultDuration: Ref<number>
   swipeVelocityThreshold: Ref<number>
 }
 
 const NOTIFICATION_PROVIDER_KEY = Symbol() as InjectionKey<NotificationProviderContext>
 
-export function useNotificationProviderContext(): NotificationProviderContext{
+export function useNotificationProviderContext(): NotificationProviderContext {
   const ctx = inject(NOTIFICATION_PROVIDER_KEY, null)
-  if(!ctx){
+  if (!ctx) {
     throw new Error('[vex] notification provider context was not found')
   } else {
     return ctx
@@ -18,7 +21,8 @@ export function useNotificationProviderContext(): NotificationProviderContext{
 </script>
 
 <script setup lang="ts">
-import { ref, type InjectionKey, inject, provide, toRef, type Ref } from 'vue'
+import { useTextDirection } from '@vueuse/core'
+import { ref, type InjectionKey, inject, provide, toRef, type Ref, computed } from 'vue'
 
 defineOptions({
   inheritAttrs: false,
@@ -29,22 +33,33 @@ const props = withDefaults(
     focusKey?: string
     swipeThreshold?: number
     defaultDuration?: number
+    swipeDismissDir?: Directions
     swipeVelocityThreshold?: number
   }>(),
   {
     focusKey: 'F8',
     swipeThreshold: 0.5,
     defaultDuration: 10_000,
+    swipeDismissDir: 'right',
     swipeVelocityThreshold: 0.2,
   }
 )
 
 const NotificationProviderEl = ref<HTMLElement | null>(null)
+const dir = useTextDirection()
+const swipeDismissDir = computed(() => {
+  if (['left', 'right'].includes(props.swipeDismissDir)) {
+    return dir.value === 'rtl' ? 'left' : 'right'
+  } else {
+    return props.swipeDismissDir
+  }
+})
 
 provide(NOTIFICATION_PROVIDER_KEY, {
+  swipeDismissDir,
   swipeThreshold: toRef(() => props.swipeThreshold),
-  swipeVelocityThreshold: toRef(() => props.swipeVelocityThreshold),
   defaultDuration: toRef(() => props.defaultDuration),
+  swipeVelocityThreshold: toRef(() => props.swipeVelocityThreshold),
 })
 
 function onKeydown(e: KeyboardEvent) {

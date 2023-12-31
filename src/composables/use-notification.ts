@@ -1,23 +1,37 @@
 import { useContext } from '@/Context'
-import { readonly, type Ref } from 'vue'
+import { readonly } from 'vue'
 import { useID } from './use-id'
-import type { NotifyOptions, NotificationItem } from '@/plugin'
 
-export function useNotification<T extends Record<string, any>>(uid?: string | symbol) {
-  const { notifications } = useContext<T>(uid)
+export interface NotifyOptions {
+  persist?: boolean
+  duration: number
+  closable?: boolean
+}
 
-  const notify = (meta: T, options: NotifyOptions) => {
-    const uuid = useID()
-    const notification: NotificationItem<T> = { uuid, ...options, meta }
-    notifications.value.unshift(notification)
+export interface NotifyReturn {
+  id: string
+}
+
+export interface NotificationItem<T extends Record<string, any> = Record<string, any>>
+  extends NotifyOptions {
+  id: string
+  content: T
+}
+
+export function useNotification<T extends Record<string, any>>(id?: string | symbol) {
+  const { notifications } = useContext<T>(id)
+
+  const notify = (content: T, options: NotifyOptions): NotifyReturn => {
+    const id = useID()
+    const notification: NotificationItem<T> = { id, ...options, content }
+    notifications.value = [notification, ...notifications.value]
     return {
-      uuid,
-      dismiss: () => dismiss(uuid),
+      id,
     }
   }
 
-  const dismiss = (uuid: string) => {
-    notifications.value = notifications.value.filter((item) => item.uuid !== uuid)
+  const dismiss = (id: string) => {
+    notifications.value = notifications.value.filter((item) => item.id !== id)
   }
 
   const dismissAllNotifications = () => {
