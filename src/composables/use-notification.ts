@@ -22,11 +22,11 @@ export function useNotification<T extends Record<string, any>>(id?: string | sym
   const { notifications } = useContext<T>(id)
 
   const notify = (content: T, options: NotifyOptions): NotifyReturn => {
-    const id = useID()
-    const notification: NotificationItem<T> = { id, ...options, content }
+    const notificationId = useID()
+    const notification: NotificationItem<T> = { id: notificationId, ...options, content }
     notifications.value = [notification, ...notifications.value]
     return {
-      id,
+      id: notificationId,
     }
   }
 
