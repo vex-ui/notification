@@ -60,8 +60,10 @@ if (timer) {
 //=================================================================================================
 
 const HORIZONTAL_DIRECTIONS = ['left', 'right']
-const transform = ref('')
 const notificationEl = ref<HTMLElement | null>(null)
+const swipeState = ref<'start' | 'move' | 'cancel' | 'end' | 'idle'>('idle')
+const distanceX = ref('0')
+const distanceY = ref('0')
 
 let swipeStartTime: number
 
@@ -69,14 +71,20 @@ const isSwipingInDismissDirection = computed(() => swipeDismissDir.value === dir
 
 const { lengthX, lengthY, direction } = useSwipe(notificationEl, {
   onSwipeStart() {
-    pauseTimer()
+    swipeState.value = 'start'
     swipeStartTime = Date.now()
+    pauseTimer()
   },
   onSwipe() {
-    if (!isSwipingInDismissDirection) return
-    const isSwipeHorizontal = HORIZONTAL_DIRECTIONS.includes(direction.value)
-    const swipeDistance = isSwipeHorizontal ? lengthX.value : lengthY.value
-    transform.value = `translateX(${swipeDistance * -1}px)`
+    if (!isSwipingInDismissDirection.value) return
+    if (HORIZONTAL_DIRECTIONS.includes(direction.value)) {
+      distanceY.value = '0'
+      distanceX.value = `${lengthX.value * -1}px`
+    } else {
+      distanceX.value = '0'
+      distanceY.value = `${lengthY.value * -1}px`
+    }
+    swipeState.value = 'move'
   },
   onSwipeEnd() {
     const swipeEndTime = Date.now()
@@ -87,14 +95,15 @@ const { lengthX, lengthY, direction } = useSwipe(notificationEl, {
     const elementLength = (isSwipeHorizontal ? width : height) ?? 0
 
     if (elementLength <= 0) {
+      swipeState.value = 'end'
+      distanceX.value = '0'
+      distanceY.value = '0'
       stopTimer()
-      transform.value = ''
       return
     }
 
     const swipeVelocity = Math.abs(swipeDistance) / swipeDuration
     const swipeRatio = Math.abs(swipeDistance) / elementLength
-
     const isSwipeDistanceSufficient = swipeRatio >= swipeThreshold.value
     const isSwipeVelocitySufficient = swipeVelocity >= swipeVelocityThreshold.value
 
@@ -102,12 +111,14 @@ const { lengthX, lengthY, direction } = useSwipe(notificationEl, {
       isSwipingInDismissDirection.value &&
       (isSwipeDistanceSufficient || isSwipeVelocitySufficient)
     ) {
-      transform.value = ''
+      swipeState.value = 'end'
       stopTimer()
     } else {
-      transform.value = ''
+      swipeState.value = 'cancel'
       resumeTimer()
     }
+    distanceX.value = '0'
+    distanceY.value = '0'
   },
   threshold: 1,
   passive: false,
@@ -125,7 +136,8 @@ defineExpose({
     ref="notificationEl"
     tabindex="0"
     role="status"
-    :style="{ transform }"
+    :style="{ '--vex-swipe-distance-x': distanceX, '--vex-swipe-distance-y': distanceY }"
+    :data-swipe="swipeState"
     aria-atomic="true"
     @keydown.esc="stopTimer"
     @mouseenter="pauseTimer"
