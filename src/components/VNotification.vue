@@ -62,8 +62,6 @@ if (timer) {
 const HORIZONTAL_DIRECTIONS = ['left', 'right']
 const transform = ref('')
 const notificationEl = ref<HTMLElement | null>(null)
-const width = computed(() => notificationEl.value?.offsetWidth ?? 0)
-const height = computed(() => notificationEl.value?.offsetHeight ?? 0)
 
 let swipeStartTime: number
 
@@ -75,25 +73,18 @@ const { lengthX, lengthY, direction } = useSwipe(notificationEl, {
     swipeStartTime = Date.now()
   },
   onSwipe() {
+    if (!isSwipingInDismissDirection) return
     const isSwipeHorizontal = HORIZONTAL_DIRECTIONS.includes(direction.value)
-
-    if (!isSwipingInDismissDirection.value) {
-      transform.value = ''
-      return
-    }
-
-    if (isSwipeHorizontal) {
-      transform.value = `translateX(${lengthX.value * -1}px)`
-    } else {
-      transform.value = `translateY(${lengthY.value * -1}px)`
-    }
+    const swipeDistance = isSwipeHorizontal ? lengthX.value : lengthY.value
+    transform.value = `translateX(${swipeDistance * -1}px)`
   },
   onSwipeEnd() {
     const swipeEndTime = Date.now()
     const swipeDuration = swipeEndTime - swipeStartTime
+    const { width, height } = notificationEl.value?.getBoundingClientRect() ?? {}
     const isSwipeHorizontal = HORIZONTAL_DIRECTIONS.includes(direction.value)
     const swipeDistance = isSwipeHorizontal ? lengthX.value : lengthY.value
-    const elementLength = isSwipeHorizontal ? width.value : height.value
+    const elementLength = (isSwipeHorizontal ? width : height) ?? 0
 
     if (elementLength <= 0) {
       stopTimer()
