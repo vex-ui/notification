@@ -1,5 +1,5 @@
-export { useNotification } from '@/composables'
-export { VNotification, VNotificationProvider } from './components'
+export { useToastService } from '@/composables'
+export { Toast, ToastProvider } from './components'
 
-import { VexNotificationPlugin } from './plugin'
-export default VexNotificationPlugin
+import { VexToastPlugin } from './plugin'
+export default VexToastPlugin

@@ -2,7 +2,7 @@
 import { useTimer } from '@/composables'
 import { useSwipe } from '@vueuse/core'
 import { computed, onMounted, ref } from 'vue'
-import { useNotificationProviderContext } from './VNotificationProvider.vue'
+import { injectToastProvider } from './ToastProvider.vue'
 
 const props = withDefaults(
   defineProps<{
@@ -21,7 +21,7 @@ const emit = defineEmits<{
 }>()
 
 const { swipeThreshold, swipeVelocityThreshold, defaultDuration, swipeDismissDir } =
-  useNotificationProviderContext()
+  injectToastProvider()
 
 //=================================================================================================
 // timer
@@ -60,7 +60,7 @@ if (timer) {
 //=================================================================================================
 
 const HORIZONTAL_DIRECTIONS = ['left', 'right']
-const notificationEl = ref<HTMLElement | null>(null)
+const toastEl = ref<HTMLElement | null>(null)
 const swipeState = ref<'start' | 'move' | 'cancel' | 'end' | 'idle'>('idle')
 const distanceX = ref('0')
 const distanceY = ref('0')
@@ -69,7 +69,7 @@ let swipeStartTime: number
 
 const isSwipingInDismissDirection = computed(() => swipeDismissDir.value === direction.value)
 
-const { lengthX, lengthY, direction } = useSwipe(notificationEl, {
+const { lengthX, lengthY, direction } = useSwipe(toastEl, {
   onSwipeStart() {
     swipeState.value = 'start'
     swipeStartTime = Date.now()
@@ -89,7 +89,7 @@ const { lengthX, lengthY, direction } = useSwipe(notificationEl, {
   onSwipeEnd() {
     const swipeEndTime = Date.now()
     const swipeDuration = swipeEndTime - swipeStartTime
-    const { width, height } = notificationEl.value?.getBoundingClientRect() ?? {}
+    const { width, height } = toastEl.value?.getBoundingClientRect() ?? {}
     const isSwipeHorizontal = HORIZONTAL_DIRECTIONS.includes(direction.value)
     const swipeDistance = isSwipeHorizontal ? lengthX.value : lengthY.value
     const elementLength = (isSwipeHorizontal ? width : height) ?? 0
@@ -133,7 +133,7 @@ defineExpose({
 
 <template>
   <div
-    ref="notificationEl"
+    ref="toastEl"
     tabindex="0"
     role="status"
     :style="{ '--vex-swipe-distance-x': distanceX, '--vex-swipe-distance-y': distanceY }"

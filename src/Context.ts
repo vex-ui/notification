@@ -1,19 +1,19 @@
 import { inject, type Ref } from 'vue'
-import type { NotificationPluginOptions } from '@/plugin'
-import type { NotificationItem } from '@/composables/use-notification'
+import type { ToastPluginOptions } from '@/plugin'
+import type { ToastItem } from '@/composables/use-toast'
 
-export interface NotificationContext<T extends Record<string, any>>
-  extends Required<NotificationPluginOptions> {
-  notifications: Ref<NotificationItem<T>[]>
+export interface ToastServiceContext<T extends Record<string, any>>
+  extends Required<ToastPluginOptions> {
+  toasts: Ref<ToastItem<T>[]>
 }
 
-export const DEFAULT_NOTIFICATION_CONTEXT_ID = 'vex-notification-context-default-id'
+export const DEFAULT_TOAST_SERVICE_ID = 'vex-toast-service-default-id'
 
 export function useContext<T extends Record<string, any>>(id?: string | symbol) {
-  const ctx = inject<NotificationContext<T> | null>(id ?? DEFAULT_NOTIFICATION_CONTEXT_ID, null)
+  const ctx = inject<ToastServiceContext<T> | null>(id ?? DEFAULT_TOAST_SERVICE_ID, null)
   if (!ctx) {
     throw new Error(
-      '[vex] notification context was not found, make sure you have installed the plugin'
+      '[vex] toast service context was not found, make sure you have installed the plugin'
     )
   }
   return ctx

@@ -1,19 +1,19 @@
 <script lang="ts">
 export type Directions = 'up' | 'down' | 'left' | 'right' | 'none'
 
-export interface NotificationProviderContext {
+export interface ToastProviderContext {
   swipeThreshold: Ref<number>
   swipeDismissDir: Ref<Directions>
   defaultDuration: Ref<number>
   swipeVelocityThreshold: Ref<number>
 }
 
-const NOTIFICATION_PROVIDER_KEY = Symbol() as InjectionKey<NotificationProviderContext>
+const TOAST_PROVIDER_KEY = Symbol() as InjectionKey<ToastProviderContext>
 
-export function useNotificationProviderContext(): NotificationProviderContext {
-  const ctx = inject(NOTIFICATION_PROVIDER_KEY, null)
+export function injectToastProvider(): ToastProviderContext {
+  const ctx = inject(TOAST_PROVIDER_KEY, null)
   if (!ctx) {
-    throw new Error('[vex] notification provider context was not found')
+    throw new Error('[vex] toast provider context was not found')
   } else {
     return ctx
   }
@@ -46,9 +46,9 @@ const props = withDefaults(
   }
 )
 
-const NotificationProviderEl = ref<HTMLElement | null>(null)
+const ToastProviderEl = ref<HTMLElement | null>(null)
 
-provide(NOTIFICATION_PROVIDER_KEY, {
+provide(TOAST_PROVIDER_KEY, {
   swipeDismissDir: toRef(() => props.swipeDismissDir),
   swipeThreshold: toRef(() => props.swipeThreshold),
   defaultDuration: toRef(() => props.defaultDuration),
@@ -57,14 +57,14 @@ provide(NOTIFICATION_PROVIDER_KEY, {
 
 function onKeydown(e: KeyboardEvent) {
   if (e.key === props.focusKey && !e.altKey && !e.shiftKey && !e.ctrlKey) {
-    NotificationProviderEl.value?.focus()
+    ToastProviderEl.value?.focus()
   }
 }
 </script>
 
 <template>
   <div
-    ref="NotificationProviderEl"
+    ref="ToastProviderEl"
     role="region"
     tabindex="-1"
     :aria-live="props.ariaLive"

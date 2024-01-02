@@ -1,7 +1,7 @@
 {
-  "name": "@vex-ui/notification",
+  "name": "@vex-ui/toast",
   "version": "0.2.0",
-  "description": "A simple and customizable notification system for Vue 3 applications.",
+  "description": "A simple and customizable toast notification system for Vue 3 applications.",
   "author": {
     "name": "Shareef Hassan",
     "email": "shareef.hassan.dev@gmail.com",
@@ -11,6 +11,7 @@
     "vue",
     "vue3",
     "notification",
+    "toast",
     "vex"
   ],
   "files": [

@@ -1,2 +1,2 @@
-export { default as VNotification } from './VNotification.vue'
-export { default as VNotificationProvider } from './VNotificationProvider.vue'
+export { default as Toast } from './Toast.vue'
+export { default as ToastProvider } from './ToastProvider.vue'
