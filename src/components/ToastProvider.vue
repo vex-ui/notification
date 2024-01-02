@@ -23,10 +23,6 @@ export function injectToastProvider(): ToastProviderContext {
 <script setup lang="ts">
 import { inject, provide, ref, toRef, type InjectionKey, type Ref } from 'vue'
 
-defineOptions({
-  inheritAttrs: false,
-})
-
 const props = withDefaults(
   defineProps<{
     focusKey?: string
