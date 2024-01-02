@@ -34,6 +34,7 @@ const props = withDefaults(
     defaultDuration?: number
     swipeDismissDir?: Directions
     swipeVelocityThreshold?: number
+    ariaLive?: 'polite' | 'assertive' | 'off'
   }>(),
   {
     focusKey: 'F8',
@@ -41,6 +42,7 @@ const props = withDefaults(
     defaultDuration: 10_000,
     swipeDismissDir: 'right',
     swipeVelocityThreshold: 0.2,
+    ariaLive: 'polite',
   }
 )
 
@@ -63,11 +65,9 @@ function onKeydown(e: KeyboardEvent) {
 <template>
   <div
     ref="NotificationProviderEl"
-    aria-label="Notifications (F8)"
-    v-bind="$attrs"
-    tabindex="-1"
     role="region"
-    aria-live="polite"
+    tabindex="-1"
+    :aria-live="props.ariaLive"
     @keydown="onKeydown"
   >
     <slot />
