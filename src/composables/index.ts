@@ -1,3 +1,3 @@
 export { useID } from './use-id'
 export { useTimer } from './use-timer'
-export { useToastService } from './use-toast'
+export { useToast } from './use-toast'

@@ -1,33 +1,9 @@
-import { useContext } from '@/Context'
-import { readonly } from 'vue'
+import { readonly, shallowRef } from 'vue'
 import { useID } from './use-id'
 
-export interface UseToastOptions {
-  newToastsPosition?: 'start' | 'end'
-}
-
-export interface ToastifyOptions {
-  persist?: boolean
-  duration: number
-  closable?: boolean
-}
-
-export interface ToastifyReturn {
-  id: string
-}
-
-export interface ToastItem<T extends Record<string, any> = Record<string, any>>
-  extends ToastifyOptions {
-  id: string
-  content: T
-}
-
-export function useToastService<T extends Record<string, any>>(
-  id?: string | symbol,
-  options: UseToastOptions = {}
-) {
+export function useToast<T extends Record<string, any>>(options: UseToastOptions = {}) {
   const { newToastsPosition = 'end' } = options
-  const { toasts } = useContext<T>(id)
+  const toasts = shallowRef<ToastItem<T>[]>([])
 
   const toastify = (content: T, options: ToastifyOptions): ToastifyReturn => {
     const toastId = useID()
@@ -52,4 +28,24 @@ export function useToastService<T extends Record<string, any>>(
     dismissAll,
     toasts: readonly(toasts),
   }
+}
+
+export interface UseToastOptions {
+  newToastsPosition?: 'start' | 'end'
+}
+
+export interface ToastifyOptions {
+  persist?: boolean
+  duration: number
+  closable?: boolean
+}
+
+export interface ToastifyReturn {
+  id: string
+}
+
+export interface ToastItem<T extends Record<string, any> = Record<string, any>>
+  extends ToastifyOptions {
+  id: string
+  content: T
 }
