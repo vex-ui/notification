@@ -5,7 +5,7 @@ export function useToast<T extends Record<string, any>>(options: UseToastOptions
   const { newToastsPosition = 'end' } = options
   const toasts = shallowRef<ToastItem<T>[]>([])
 
-  const toastify = (content: T, options: ToastifyOptions): ToastifyReturn => {
+  const toastify = (content: T, options: ToastifyOptions) => {
     const toastId = useID()
     const toast: ToastItem<T> = { id: toastId, ...options, content }
     toasts.value = newToastsPosition === 'end' ? [...toasts.value, toast] : [toast, ...toasts.value]
@@ -38,10 +38,6 @@ export interface ToastifyOptions {
   persist?: boolean
   duration: number
   closable?: boolean
-}
-
-export interface ToastifyReturn {
-  id: string
 }
 
 export interface ToastItem<T extends Record<string, any> = Record<string, any>>
