@@ -9,8 +9,11 @@ const props = withDefaults(
     uuid: string
     persist?: boolean
     duration?: number
+    autoStartTimer?: boolean
   }>(),
-  {}
+  {
+    autoStartTimer: true,
+  }
 )
 
 const emit = defineEmits<{
@@ -51,7 +54,7 @@ function resumeTimer() {
   emit('timerResume')
 }
 
-if (timer) {
+if (timer && props.autoStartTimer) {
   onMounted(startTimer)
 }
 
@@ -126,6 +129,7 @@ const { lengthX, lengthY, direction } = useSwipe(toastEl, {
 
 defineExpose({
   stopTimer,
+  startTimer,
   pauseTimer,
   resumeTimer,
 })

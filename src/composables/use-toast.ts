@@ -36,8 +36,9 @@ export interface UseToastOptions {
 
 export interface ToastifyOptions {
   persist?: boolean
-  duration: number
+  duration?: number
   closable?: boolean
+  autoStartTimer?: boolean
 }
 
 export interface ToastItem<T extends Record<string, any> = Record<string, any>>
