@@ -2,6 +2,10 @@ import { useContext } from '@/Context'
 import { readonly } from 'vue'
 import { useID } from './use-id'
 
+export interface UseToastOptions {
+  newToastsPosition?: 'start' | 'end'
+}
+
 export interface ToastifyOptions {
   persist?: boolean
   duration: number
@@ -18,13 +22,17 @@ export interface ToastItem<T extends Record<string, any> = Record<string, any>>
   content: T
 }
 
-export function useToastService<T extends Record<string, any>>(id?: string | symbol) {
+export function useToastService<T extends Record<string, any>>(
+  id?: string | symbol,
+  options: UseToastOptions = {}
+) {
+  const { newToastsPosition = 'end' } = options
   const { toasts } = useContext<T>(id)
 
   const toastify = (content: T, options: ToastifyOptions): ToastifyReturn => {
     const toastId = useID()
     const toast: ToastItem<T> = { id: toastId, ...options, content }
-    toasts.value = [toast, ...toasts.value]
+    toasts.value = newToastsPosition === 'end' ? [...toasts.value, toast] : [toast, ...toasts.value]
     return {
       id: toastId,
     }
