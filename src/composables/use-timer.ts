@@ -9,10 +9,12 @@ export function useTimer(duration: number, cb: () => void) {
   let startTime = 0
   let remainingTime = 0
   let timeoutID: ReturnType<typeof setTimeout>
+  let isStarted = false
   const isRunning = ref(false)
 
   const start = () => {
-    if (isRunning.value) return
+    if (isStarted) return
+    isStarted = true
 
     startTime = Date.now()
     remainingTime = duration
