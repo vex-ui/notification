@@ -1,2 +1,2 @@
-export { useToast } from '@/composables'
+export * from '@/composables/use-toast'
 export { Toast, ToastProvider } from './components'

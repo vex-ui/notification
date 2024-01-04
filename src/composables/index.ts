@@ -1,3 +1,3 @@
-export { useID } from './use-id'
-export { useTimer } from './use-timer'
-export { useToast } from './use-toast'
+export * from './use-id'
+export * from './use-timer'
+export * from './use-toast'
