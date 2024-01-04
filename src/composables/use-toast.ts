@@ -23,10 +23,10 @@ export function useToast<T extends Record<string, any>>(options: UseToastOptions
   }
 
   return {
-    toastify,
+    toasts,
     dismiss,
+    toastify,
     dismissAll,
-    toasts: readonly(toasts),
   }
 }
 
