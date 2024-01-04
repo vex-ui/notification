@@ -115,10 +115,10 @@ const { lengthX, lengthY, direction } = useSwipe(toastEl, {
       stopTimer()
     } else {
       swipeState.value = 'cancel'
+      distanceX.value = '0'
+      distanceY.value = '0'
       resumeTimer()
     }
-    distanceX.value = '0'
-    distanceY.value = '0'
   },
   threshold: 1,
   passive: false,
