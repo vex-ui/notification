@@ -64,7 +64,6 @@ if (timer && props.autoStartTimer) {
 
 const HORIZONTAL_DIRECTIONS = ['left', 'right']
 const toastEl = ref<HTMLElement | null>(null)
-const swipeState = ref<'start' | 'move' | 'cancel' | 'end' | 'idle'>('idle')
 const distanceX = ref('0')
 const distanceY = ref('0')
 
@@ -72,9 +71,8 @@ let swipeStartTime: number
 
 const isSwipingInDismissDirection = computed(() => swipeDismissDir.value === direction.value)
 
-const { lengthX, lengthY, direction } = useSwipe(toastEl, {
+const { lengthX, lengthY, direction, isSwiping } = useSwipe(toastEl, {
   onSwipeStart() {
-    swipeState.value = 'start'
     swipeStartTime = Date.now()
     pauseTimer()
   },
@@ -87,7 +85,6 @@ const { lengthX, lengthY, direction } = useSwipe(toastEl, {
       distanceX.value = '0'
       distanceY.value = `${lengthY.value * -1}px`
     }
-    swipeState.value = 'move'
   },
   onSwipeEnd() {
     const swipeEndTime = Date.now()
@@ -98,7 +95,6 @@ const { lengthX, lengthY, direction } = useSwipe(toastEl, {
     const elementLength = (isSwipeHorizontal ? width : height) ?? 0
 
     if (elementLength <= 0) {
-      swipeState.value = 'end'
       distanceX.value = '0'
       distanceY.value = '0'
       stopTimer()
@@ -114,16 +110,14 @@ const { lengthX, lengthY, direction } = useSwipe(toastEl, {
       isSwipingInDismissDirection.value &&
       (isSwipeDistanceSufficient || isSwipeVelocitySufficient)
     ) {
-      swipeState.value = 'end'
       stopTimer()
     } else {
-      swipeState.value = 'cancel'
       distanceX.value = '0'
       distanceY.value = '0'
       resumeTimer()
     }
   },
-  threshold: 1,
+  threshold: 10,
   passive: false,
 })
 
@@ -141,7 +135,7 @@ defineExpose({
     tabindex="0"
     role="status"
     :style="{ '--vex-swipe-distance-x': distanceX, '--vex-swipe-distance-y': distanceY }"
-    :data-swipe="swipeState"
+    :data-swiping="isSwiping"
     aria-atomic="true"
     @keydown.esc="stopTimer"
     @mouseenter="pauseTimer"
