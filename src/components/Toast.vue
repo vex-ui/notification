@@ -66,10 +66,9 @@ const HORIZONTAL_DIRECTIONS = ['left', 'right']
 const toastEl = ref<HTMLElement | null>(null)
 const distanceX = ref('0')
 const distanceY = ref('0')
+const isSwipingInDismissDirection = computed(() => swipeDismissDir.value === direction.value)
 
 let swipeStartTime: number
-
-const isSwipingInDismissDirection = computed(() => swipeDismissDir.value === direction.value)
 
 const { lengthX, lengthY, direction, isSwiping } = useSwipe(toastEl, {
   onSwipeStart() {
@@ -87,22 +86,25 @@ const { lengthX, lengthY, direction, isSwiping } = useSwipe(toastEl, {
     }
   },
   onSwipeEnd() {
-    const swipeEndTime = Date.now()
-    const swipeDuration = swipeEndTime - swipeStartTime
+    distanceX.value = '0'
+    distanceY.value = '0'
+
     const { width, height } = toastEl.value?.getBoundingClientRect() ?? {}
     const isSwipeHorizontal = HORIZONTAL_DIRECTIONS.includes(direction.value)
-    const swipeDistance = isSwipeHorizontal ? lengthX.value : lengthY.value
     const elementLength = (isSwipeHorizontal ? width : height) ?? 0
 
     if (elementLength <= 0) {
-      distanceX.value = '0'
-      distanceY.value = '0'
       stopTimer()
       return
     }
 
-    const swipeVelocity = Math.abs(swipeDistance) / swipeDuration
+    const swipeEndTime = Date.now()
+    const swipeDuration = swipeEndTime - swipeStartTime
+
+    const swipeDistance = isSwipeHorizontal ? lengthX.value : lengthY.value
     const swipeRatio = Math.abs(swipeDistance) / elementLength
+    const swipeVelocity = Math.abs(swipeDistance) / swipeDuration
+
     const isSwipeDistanceSufficient = swipeRatio >= swipeThreshold.value
     const isSwipeVelocitySufficient = swipeVelocity >= swipeVelocityThreshold.value
 
@@ -112,8 +114,6 @@ const { lengthX, lengthY, direction, isSwiping } = useSwipe(toastEl, {
     ) {
       stopTimer()
     } else {
-      distanceX.value = '0'
-      distanceY.value = '0'
       resumeTimer()
     }
   },
