@@ -1,4 +1,4 @@
-import { readonly, shallowRef } from 'vue'
+import { shallowRef } from 'vue'
 import { useID } from './use-id'
 
 export function useToast<T extends Record<string, any>>(options: UseToastOptions = {}) {
