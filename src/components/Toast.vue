@@ -79,10 +79,10 @@ const { lengthX, lengthY, direction, isSwiping } = useSwipe(toastEl, {
     if (!isSwipingInDismissDirection.value) return
     if (HORIZONTAL_DIRECTIONS.includes(direction.value)) {
       distanceY.value = '0'
-      distanceX.value = `${lengthX.value * -1}px`
+      distanceX.value = `${(lengthX.value * -1).toFixed(2)}px`
     } else {
       distanceX.value = '0'
-      distanceY.value = `${lengthY.value * -1}px`
+      distanceY.value = `${(lengthY.value * -1).toFixed(2)}px`
     }
   },
   onSwipeEnd() {
