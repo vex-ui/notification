@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useTimer } from '@/composables'
 import { useSwipe } from '@vueuse/core'
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { injectToastProvider } from './ToastProvider.vue'
 
 const props = withDefaults(
@@ -64,9 +64,6 @@ if (timer && props.autoStartTimer) {
 
 const HORIZONTAL_DIRECTIONS = ['left', 'right']
 const toastEl = ref<HTMLElement | null>(null)
-const distanceX = ref('0')
-const distanceY = ref('0')
-const isSwipingInDismissDirection = computed(() => swipeDismissDir.value === direction.value)
 
 let swipeStartTime: number
 
@@ -75,43 +72,11 @@ const { lengthX, lengthY, direction, isSwiping } = useSwipe(toastEl, {
     swipeStartTime = Date.now()
     pauseTimer()
   },
-  onSwipe() {
-    if (!isSwipingInDismissDirection.value) return
-    if (HORIZONTAL_DIRECTIONS.includes(direction.value)) {
-      distanceY.value = '0'
-      distanceX.value = `${(lengthX.value * -1).toFixed(2)}px`
-    } else {
-      distanceX.value = '0'
-      distanceY.value = `${(lengthY.value * -1).toFixed(2)}px`
-    }
-  },
   onSwipeEnd() {
-    distanceX.value = '0'
-    distanceY.value = '0'
+    const { swipeRatio, swipeVelocity } = getSwipeProperties()
+    const isSwipingInDismissDirection = swipeDismissDir.value === direction.value
 
-    const { width, height } = toastEl.value?.getBoundingClientRect() ?? {}
-    const isSwipeHorizontal = HORIZONTAL_DIRECTIONS.includes(direction.value)
-    const elementLength = (isSwipeHorizontal ? width : height) ?? 0
-
-    if (elementLength <= 0) {
-      stopTimer()
-      return
-    }
-
-    const swipeEndTime = Date.now()
-    const swipeDuration = swipeEndTime - swipeStartTime
-
-    const swipeDistance = isSwipeHorizontal ? lengthX.value : lengthY.value
-    const swipeRatio = Math.abs(swipeDistance) / elementLength
-    const swipeVelocity = Math.abs(swipeDistance) / swipeDuration
-
-    const isSwipeDistanceSufficient = swipeRatio >= swipeThreshold.value
-    const isSwipeVelocitySufficient = swipeVelocity >= swipeVelocityThreshold.value
-
-    if (
-      isSwipingInDismissDirection.value &&
-      (isSwipeDistanceSufficient || isSwipeVelocitySufficient)
-    ) {
+    if (isSwipingInDismissDirection && isSwipeSufficient(swipeRatio, swipeVelocity)) {
       stopTimer()
     } else {
       resumeTimer()
@@ -120,6 +85,30 @@ const { lengthX, lengthY, direction, isSwiping } = useSwipe(toastEl, {
   threshold: 10,
   passive: false,
 })
+
+watch([lengthX, lengthY], ([x, y]) => {
+  toastEl.value?.style.setProperty('--vex-swipe-distance-x', `${x * -1}px`)
+  toastEl.value?.style.setProperty('--vex-swipe-distance-y', `${y * -1}px`)
+})
+
+function getSwipeProperties() {
+  const { width, height } = toastEl.value?.getBoundingClientRect() ?? {}
+  const isSwipeHorizontal = HORIZONTAL_DIRECTIONS.includes(direction.value)
+  const elementLength = (isSwipeHorizontal ? width : height) ?? 0
+  const swipeDistance = isSwipeHorizontal ? lengthX.value : lengthY.value
+  const swipeEndTime = Date.now()
+  const swipeDuration = swipeEndTime - swipeStartTime
+  const swipeRatio = Math.abs(swipeDistance) / elementLength
+  const swipeVelocity = Math.abs(swipeDistance) / swipeDuration
+
+  return { swipeRatio, swipeVelocity }
+}
+
+function isSwipeSufficient(swipeRatio: number, swipeVelocity: number): boolean {
+  const isSwipeDistanceSufficient = swipeRatio >= swipeThreshold.value
+  const isSwipeVelocitySufficient = swipeVelocity >= swipeVelocityThreshold.value
+  return isSwipeDistanceSufficient || isSwipeVelocitySufficient
+}
 
 defineExpose({
   stopTimer,
@@ -134,8 +123,8 @@ defineExpose({
     ref="toastEl"
     tabindex="0"
     role="status"
-    :style="{ '--vex-swipe-distance-x': distanceX, '--vex-swipe-distance-y': distanceY }"
     :data-swiping="isSwiping"
+    :data-swipe-dir="direction"
     aria-atomic="true"
     @keydown.esc="stopTimer"
     @mouseenter="pauseTimer"
