@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useTimer } from '@/composables'
 import { useSwipe } from '@vueuse/core'
-import { computed, onMounted, ref, watch } from 'vue'
+import { onMounted, ref, watch } from 'vue'
 import { injectToastProvider } from './ToastProvider.vue'
 
 const props = withDefaults(
@@ -62,9 +62,7 @@ if (timer && props.autoStartTimer) {
 // swipe
 //=================================================================================================
 
-const HORIZONTAL_DIRECTIONS = ['left', 'right']
 const toastEl = ref<HTMLElement | null>(null)
-
 let swipeStartTime: number
 
 const { lengthX, lengthY, direction, isSwiping } = useSwipe(toastEl, {
@@ -93,11 +91,12 @@ watch([lengthX, lengthY], ([x, y]) => {
 
 function getSwipeProperties() {
   const { width, height } = toastEl.value?.getBoundingClientRect() ?? {}
-  const isSwipeHorizontal = HORIZONTAL_DIRECTIONS.includes(direction.value)
+  const isSwipeHorizontal = ['left', 'right'].includes(direction.value)
   const elementLength = (isSwipeHorizontal ? width : height) ?? 0
+
   const swipeDistance = isSwipeHorizontal ? lengthX.value : lengthY.value
-  const swipeEndTime = Date.now()
-  const swipeDuration = swipeEndTime - swipeStartTime
+  const swipeDuration = Date.now() - swipeStartTime
+
   const swipeRatio = Math.abs(swipeDistance) / elementLength
   const swipeVelocity = Math.abs(swipeDistance) / swipeDuration
 
